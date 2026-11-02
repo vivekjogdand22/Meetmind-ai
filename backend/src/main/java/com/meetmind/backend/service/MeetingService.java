@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.meetmind.backend.entity.Meeting;
 import com.meetmind.backend.repository.MeetingRepository;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -27,20 +28,24 @@ public class MeetingService
 
     private final ObjectMapper objectMapper;
 
-    private final Path uploadDirectory =
-            Paths.get("uploads");
+    private final Path uploadDirectory;
 
 
+    // The folder for uploaded recordings. It is "uploads" (next to where the
+    // backend runs) unless meetmind.upload-dir says otherwise.
     public MeetingService(
             MeetingRepository meetingRepository,
             AiServiceClient aiServiceClient,
-            ObjectMapper objectMapper)
+            ObjectMapper objectMapper,
+            @Value("${meetmind.upload-dir:uploads}") String uploadDirectory)
     {
         this.meetingRepository = meetingRepository;
 
         this.aiServiceClient = aiServiceClient;
 
         this.objectMapper = objectMapper;
+
+        this.uploadDirectory = Paths.get(uploadDirectory);
     }
 
 
@@ -235,6 +240,11 @@ public class MeetingService
             );
 
 
+            meeting.setAnalysisSource(
+                    analysis.analysisSource()
+            );
+
+
             meeting.setKeyDecisions(
                     serializeToJson(
                             analysis.keyDecisions()
@@ -270,6 +280,8 @@ public class MeetingService
             );
 
 
+            // MeetingExceptionHandler finds the AiProcessingException inside
+            // this wrapper and shows its message to the user.
             throw new RuntimeException(
                     "AI processing failed",
                     exception

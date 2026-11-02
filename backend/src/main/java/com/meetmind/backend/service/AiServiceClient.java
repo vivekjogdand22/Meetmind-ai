@@ -2,16 +2,20 @@ package com.meetmind.backend.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.meetmind.backend.exception.AiProcessingException;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.ResourceAccessException;
+import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.File;
@@ -118,8 +122,10 @@ public class AiServiceClient
             if (!transcript.isTextual()
                     || transcript.asText().isBlank())
             {
-                throw new RuntimeException(
-                        "AI service returned no transcript"
+                throw new AiProcessingException(
+                        "The AI service returned no transcript",
+                        HttpStatus.BAD_GATEWAY,
+                        null
                 );
             }
 
@@ -128,8 +134,8 @@ public class AiServiceClient
         }
         catch (Exception exception)
         {
-            throw new RuntimeException(
-                    "AI transcription failed",
+            throw explain(
+                    "The AI service could not transcribe the recording",
                     exception
             );
         }
@@ -188,8 +194,10 @@ public class AiServiceClient
             if (!summary.isTextual()
                     || summary.asText().isBlank())
             {
-                throw new RuntimeException(
-                        "AI service returned no summary"
+                throw new AiProcessingException(
+                        "The AI service returned no summary",
+                        HttpStatus.BAD_GATEWAY,
+                        null
                 );
             }
 
@@ -201,10 +209,87 @@ public class AiServiceClient
         }
         catch (Exception exception)
         {
-            throw new RuntimeException(
-                    "AI meeting analysis failed",
+            throw explain(
+                    "The AI service could not analyze the meeting",
                     exception
             );
+        }
+    }
+
+
+    // ============================================================
+    // TURNING FAILURES INTO MESSAGES A PERSON CAN ACT ON
+    // ============================================================
+
+    private AiProcessingException explain(
+            String whatFailed,
+            Exception exception)
+    {
+        // already explained where it happened
+        if (exception instanceof AiProcessingException explained)
+        {
+            return explained;
+        }
+
+
+        // The AI service answered, but with an error. It puts the reason in
+        // "detail", for example "No speech could be detected ...".
+        if (exception instanceof RestClientResponseException response)
+        {
+            String detail =
+                    readDetail(
+                            response.getResponseBodyAsString()
+                    );
+
+            HttpStatus status =
+                    response.getStatusCode().value() == 422
+                            ? HttpStatus.UNPROCESSABLE_ENTITY
+                            : HttpStatus.BAD_GATEWAY;
+
+            return new AiProcessingException(
+                    detail != null ? detail : whatFailed,
+                    status,
+                    exception
+            );
+        }
+
+
+        // The AI service could not be reached at all (not started,
+        // wrong address, connection dropped, timed out).
+        if (exception instanceof ResourceAccessException)
+        {
+            return new AiProcessingException(
+                    "The AI service is not reachable at "
+                            + aiServiceUrl
+                            + ". Start it and try again.",
+                    HttpStatus.SERVICE_UNAVAILABLE,
+                    exception
+            );
+        }
+
+
+        return new AiProcessingException(
+                whatFailed,
+                HttpStatus.BAD_GATEWAY,
+                exception
+        );
+    }
+
+
+    private String readDetail(String body)
+    {
+        try
+        {
+            JsonNode detail =
+                    objectMapper.readTree(body).path("detail");
+
+            return detail.isTextual() && !detail.asText().isBlank()
+                    ? detail.asText()
+                    : null;
+        }
+        catch (Exception exception)
+        {
+            return null;
         }
     }
 }

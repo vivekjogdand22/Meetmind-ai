@@ -37,6 +37,11 @@ public class Meeting
 
     private String status;
 
+    // "LLM", or "FALLBACK" when the simple rule-based extractor was used
+    // because the language model was not available. Empty for meetings
+    // that were analyzed before this field existed.
+    private String analysisSource;
+
 
     public Meeting()
     {
@@ -161,5 +166,16 @@ public class Meeting
     public void setStatus(String status)
     {
         this.status = status;
+    }
+
+
+    public String getAnalysisSource()
+    {
+        return analysisSource;
+    }
+
+    public void setAnalysisSource(String analysisSource)
+    {
+        this.analysisSource = analysisSource;
     }
 }
