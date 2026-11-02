@@ -7,6 +7,7 @@ import MeetingHistory from './components/MeetingHistory'
 import MeetingDetails from './components/MeetingDetails'
 
 import {
+    deleteMeeting,
     getAllMeetings,
     uploadMeeting
 } from './services/meetingApi'
@@ -216,6 +217,62 @@ function App()
     }
 
 
+    const handleDeleteMeeting = async (meeting) =>
+    {
+        const confirmed = window.confirm(
+            `Delete "${meeting.title || 'Untitled Meeting'}"? ` +
+            'The recording, the transcript, the AI results and the ' +
+            'project plan of this meeting will be removed.'
+        )
+
+        if (!confirmed)
+        {
+            return
+        }
+
+
+        try
+        {
+            await deleteMeeting(meeting.id)
+
+            const remainingMeetings =
+                meetings.filter(
+                    (existingMeeting) =>
+                        existingMeeting.id !== meeting.id
+                )
+
+            setMeetings(
+                remainingMeetings
+            )
+
+            setSelectedMeeting(
+                remainingMeetings[0] || null
+            )
+
+            setMessage(
+                'The meeting was deleted.'
+            )
+
+            setMessageType(
+                'success'
+            )
+        }
+        catch (error)
+        {
+            console.error(error)
+
+            setMessage(
+                error.message ||
+                'Unable to delete the meeting.'
+            )
+
+            setMessageType(
+                'error'
+            )
+        }
+    }
+
+
     return (
         <div className="app">
 
@@ -321,6 +378,9 @@ function App()
                         <MeetingDetails
                             meeting={
                                 selectedMeeting
+                            }
+                            onDelete={
+                                handleDeleteMeeting
                             }
                         />
 

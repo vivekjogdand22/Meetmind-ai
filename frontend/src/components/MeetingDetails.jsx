@@ -1,11 +1,15 @@
 import {
+    AlertTriangle,
     CalendarDays,
     FileText,
     Flag,
     ListTodo,
     Sparkles,
+    Trash2,
     UserRound
 } from 'lucide-react'
+
+import ProjectPlan from './ProjectPlan'
 
 
 function parseArray(value)
@@ -49,7 +53,7 @@ function getStatusText(status)
 }
 
 
-function MeetingDetails({ meeting })
+function MeetingDetails({ meeting, onDelete })
 {
     if (!meeting)
     {
@@ -104,15 +108,49 @@ function MeetingDetails({ meeting })
                 </div>
 
 
-                <span
-                    className={
-                        `meeting-status status-${meeting.status?.toLowerCase()}`
-                    }
-                >
-                    {getStatusText(meeting.status)}
-                </span>
+                <div className="details-header-actions">
+
+                    <span
+                        className={
+                            `meeting-status status-${meeting.status?.toLowerCase()}`
+                        }
+                    >
+                        {getStatusText(meeting.status)}
+                    </span>
+
+                    <button
+                        type="button"
+                        className="delete-meeting-button"
+                        onClick={() => onDelete(meeting)}
+                    >
+                        <Trash2 size={13} />
+                        Delete meeting
+                    </button>
+
+                </div>
 
             </div>
+
+
+            {
+                meeting.analysisSource === 'FALLBACK' &&
+                (
+                    <p
+                        className="analysis-notice"
+                        role="status"
+                    >
+                        <AlertTriangle size={15} />
+
+                        <span>
+                            The AI model was not available when this meeting was
+                            analyzed, so a much simpler analysis was used. The
+                            summary, decisions and action items may be incomplete.
+                            Start Ollama and upload the recording again for a
+                            better result.
+                        </span>
+                    </p>
+                )
+            }
 
 
             <div className="insight-grid">
@@ -303,6 +341,13 @@ function MeetingDetails({ meeting })
                     </article>
 
                 </div>
+
+
+                <ProjectPlan
+                    key={meeting.id}
+                    meetingId={meeting.id}
+                    actionItemCount={actionItems.length}
+                />
 
 
                 <article className="insight-panel transcript-panel">
