@@ -1,0 +1,59 @@
+{
+  "name": "standup",
+  "description": "Stand-up with status updates ('I finished the login page') that must not become tasks, a first-person commitment, 'today' and 'tomorrow' dates, and a decision to postpone a feature.",
+  "transcript": "Okay, let's do a quick stand-up. Yesterday I finished the login page and merged it, so that one is done. Rahul will fix the upload bug today, the one where large files fail. Sneha, you were blocked on the database credentials, right? Yes, I still don't have access to the staging database. Okay, Rahul, can you send Sneha the staging credentials today? Sure, I'll send them right after this call. Great. Sneha, once you have access, please run the migration scripts and tell us by tomorrow if anything fails. Will do. We also need someone to write the release notes for version two, nobody has picked it up yet. Let's leave it for now, it's not urgent, it can wait until next week. One more thing, the client asked whether we can support dark mode. We talked about it and decided not to do it in this release, we will revisit it after launch. Alright, that's all, thanks everyone.",
+  "gold": {
+    "tasks": [
+      {
+        "kw": [
+          "upload",
+          "bug"
+        ],
+        "owner": "Rahul",
+        "due": [
+          "today"
+        ],
+        "priority": "MEDIUM"
+      },
+      {
+        "kw": [
+          "credentials"
+        ],
+        "owner": "Rahul",
+        "due": [
+          "today"
+        ],
+        "priority": "MEDIUM"
+      },
+      {
+        "kw": [
+          "migration"
+        ],
+        "owner": "Sneha",
+        "due": [
+          "tomorrow"
+        ],
+        "priority": "MEDIUM"
+      },
+      {
+        "kw": [
+          "release notes"
+        ],
+        "owner": "Unassigned",
+        "due": [
+          "next week",
+          null
+        ],
+        "priority": "LOW"
+      }
+    ],
+    "optional": [],
+    "decisions": [
+      {
+        "kw": [
+          "dark mode"
+        ]
+      }
+    ]
+  }
+}

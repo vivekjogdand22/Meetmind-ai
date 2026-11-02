@@ -1,0 +1,16 @@
+{
+  "name": "messy",
+  "description": "Filler words and false starts like raw speech-to-text output, a topic that is explicitly parked (the dashboard charts) and must not become a task, and a decision.",
+  "transcript": "Um, so yeah, the, the main thing is the invoice export is broken for, like, the European customers, right? And John said he'd look at it, um, tomorrow morning, I think. We really need that fixed before Friday because the finance people are waiting on it, that's kind of urgent, honestly. Then, uh, the dashboard thing, the charts are slow, but that's not a priority, we can park it, nobody's going to touch that this sprint. Okay. And Sarah, you were going to write the onboarding email, right? Yeah, I'll send you the draft by Wednesday. Cool. And one more thing, we agreed to drop support for Internet Explorer, finally. That's decided. Okay, anything else? No? Alright, thanks, bye.",
+  "gold": {
+    "tasks": [
+      {"kw": ["invoice"], "owner": "John", "due": ["tomorrow", "friday"], "priority": "HIGH"},
+      {"kw": ["onboarding|email|draft"], "owner": "Sarah", "due": ["wednesday"], "priority": "MEDIUM"}
+    ],
+    "optional": [],
+    "decisions": [
+      {"kw": ["internet explorer"]},
+      {"kw": ["dashboard|charts"]}
+    ]
+  }
+}

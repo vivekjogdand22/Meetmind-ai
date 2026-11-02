@@ -1,0 +1,19 @@
+{
+  "name": "kickoff",
+  "description": "Project kickoff with explicit dependencies ('only after', 'once both are finished') and durations. This is the kind of meeting the PERT/CPM planner is built for.",
+  "transcript": "Okay everyone, welcome to the kickoff for the library app. The plan is simple. First, Nisha will draw the database schema, she needs about three days, so it should be ready by Thursday. Only after the schema is ready, Omar can build the REST endpoints, and he thinks that will take about a week. While Omar builds the backend, Tara will design the screens in Figma, and that should be done by next Wednesday. Once the endpoints and the designs are both finished, Kabir will connect the frontend to the API, and he needs five days for that. Finally, the whole team will test everything together on the twenty-fifth, and then we ship. One decision I want on record, we are going with PostgreSQL and not MongoDB, that is final. Also, Tara asked for the logo files, so Nisha will email marketing today.",
+  "gold": {
+    "tasks": [
+      {"kw": ["schema"], "owner": "Nisha", "due": ["thursday"], "priority": "MEDIUM"},
+      {"kw": ["rest|endpoint|backend"], "owner": "Omar", "due": [null, "week"], "priority": "MEDIUM"},
+      {"kw": ["screen|design|figma"], "owner": "Tara", "due": ["next wednesday"], "priority": "MEDIUM"},
+      {"kw": ["frontend", "connect|integrat|api"], "owner": "Kabir", "due": [null, "five days", "5 days"], "priority": "MEDIUM"},
+      {"kw": ["test"], "owner": "Team", "due": ["twenty-fifth", "25th"], "priority": "MEDIUM"},
+      {"kw": ["logo|marketing"], "owner": "Nisha", "due": ["today"], "priority": "MEDIUM"}
+    ],
+    "optional": [],
+    "decisions": [
+      {"kw": ["postgres"]}
+    ]
+  }
+}

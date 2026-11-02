@@ -4,7 +4,7 @@ from pathlib import Path
 
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from faster_whisper import WhisperModel
-from meeting_analysis import analyze_meeting_with_llm
+from meeting_analysis import OLLAMA_MODEL, analyze_meeting_with_llm
 from pydantic import BaseModel
 
 
@@ -49,7 +49,7 @@ def health():
         "service": "MeetMind AI Service",
         "version": "2.0.0",
         "transcriptionModel": "faster-whisper-base",
-        "analysisModel": "qwen3:8b",
+        "analysisModel": OLLAMA_MODEL,
     }
 
 

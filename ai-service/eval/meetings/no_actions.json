@@ -1,0 +1,10 @@
+{
+  "name": "no_actions",
+  "description": "Pure discussion. The correct answer is no tasks and no decisions (tests for invented work).",
+  "transcript": "So I was reading about how other companies handle on-call rotations, and it's actually pretty interesting. Some teams rotate weekly, others rotate daily. There are pros and cons, right? Weekly means fewer handoffs but more fatigue. Daily is lighter but you lose context. Personally I don't think we need to change anything right now. We might look at this again at some point if the pager load gets worse, but nobody is proposing anything. Anyway, I just wanted to share that. Does anyone have thoughts? Not really? Okay. The weather has been terrible this week, hasn't it? Anyway, that's all for today.",
+  "gold": {
+    "tasks": [],
+    "optional": [],
+    "decisions": []
+  }
+}

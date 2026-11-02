@@ -1,0 +1,116 @@
+{
+  "name": "planning",
+  "description": "Sprint planning with seven tasks, urgency words, 'no rush' (LOW priority), dates like 'the twelfth', a side task for Legal, and three decisions including a postponement.",
+  "transcript": "Alright team, sprint planning for the payment feature. First, the big decision. We were thinking of building our own payment form, but after looking at the compliance requirements we agreed to use Stripe Checkout instead. Everyone okay with that? Good. So Meera, you own the Stripe integration. It's the blocker for everything else, so please start immediately and have it done by the twelfth. Next, Jon will design the order confirmation email. There's no rush, he can take until the end of the month. Priya, the database changes for storing transactions have to be ready before Meera starts testing, so please finish the schema migration by the tenth. That one is urgent. Once the integration is in, Meera will test the whole flow in the sandbox, which should be done by the fourteenth. After testing passes, Arjun will deploy to production, and we want that to happen on the twentieth. Also, someone has to update the refund policy page. Legal asked for it, but I'm not sure who should take it. Priya will email Legal today to get the exact wording first. On the metrics side, we decided to track failed payments in the dashboard, but we are postponing the fraud detection work to next quarter. Final point, the client demo is on the twenty-second and the whole team will join, so please keep that date free.",
+  "gold": {
+    "tasks": [
+      {
+        "kw": [
+          "stripe"
+        ],
+        "owner": "Meera",
+        "due": [
+          "twelfth",
+          "12th"
+        ],
+        "priority": "HIGH"
+      },
+      {
+        "kw": [
+          "confirmation",
+          "email"
+        ],
+        "owner": "Jon",
+        "due": [
+          "end of the month",
+          "end of month"
+        ],
+        "priority": "LOW"
+      },
+      {
+        "kw": [
+          "migration|schema|database"
+        ],
+        "owner": "Priya",
+        "due": [
+          "tenth",
+          "10th"
+        ],
+        "priority": "HIGH"
+      },
+      {
+        "kw": [
+          "test",
+          "sandbox|flow"
+        ],
+        "owner": "Meera",
+        "due": [
+          "fourteenth",
+          "14th"
+        ],
+        "priority": "MEDIUM"
+      },
+      {
+        "kw": [
+          "deploy"
+        ],
+        "owner": "Arjun",
+        "due": [
+          "twentieth",
+          "20th"
+        ],
+        "priority": "MEDIUM"
+      },
+      {
+        "kw": [
+          "email",
+          "legal"
+        ],
+        "owner": "Priya",
+        "due": [
+          "today"
+        ],
+        "priority": "MEDIUM"
+      },
+      {
+        "kw": [
+          "refund"
+        ],
+        "owner": "Unassigned",
+        "due": [
+          null
+        ],
+        "priority": "MEDIUM"
+      }
+    ],
+    "optional": [
+      {
+        "kw": [
+          "demo"
+        ]
+      },
+      {
+        "kw": [
+          "failed payments"
+        ]
+      }
+    ],
+    "decisions": [
+      {
+        "kw": [
+          "stripe"
+        ]
+      },
+      {
+        "kw": [
+          "failed payments"
+        ]
+      },
+      {
+        "kw": [
+          "fraud"
+        ]
+      }
+    ]
+  }
+}

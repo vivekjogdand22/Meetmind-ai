@@ -1,0 +1,86 @@
+{
+  "name": "sample",
+  "description": "Four-step project chain with explicit owners and dates, one HIGH and one LOW priority task, and 'next Monday' style dates. The model once skipped the last step (the demonstration).",
+  "transcript": "Good morning everyone, let's go through the plan for the MeetMind final project. We decided to build the interface in React and keep Spring Boot for the backend. We also agreed that the final demonstration will be held in the seminar hall. Vivek will complete the frontend design by Wednesday. Amit will develop the backend APIs by Friday, and this is critical because everything else depends on it. Integration testing can only start after the frontend design and the backend APIs are both finished, and the team will perform integration testing next Monday. Once integration testing is done, the team will give the final demonstration on Thursday. Priya, please prepare the demo slides by next Tuesday. Someone should also update the README at some point, but that is optional and can be done later.",
+  "gold": {
+    "tasks": [
+      {
+        "kw": [
+          "frontend",
+          "design"
+        ],
+        "owner": "Vivek",
+        "due": [
+          "wednesday"
+        ],
+        "priority": "MEDIUM"
+      },
+      {
+        "kw": [
+          "backend",
+          "api"
+        ],
+        "owner": "Amit",
+        "due": [
+          "friday"
+        ],
+        "priority": "HIGH"
+      },
+      {
+        "kw": [
+          "integration",
+          "test"
+        ],
+        "owner": "Team",
+        "due": [
+          "next monday"
+        ],
+        "priority": "MEDIUM"
+      },
+      {
+        "kw": [
+          "demonstration"
+        ],
+        "owner": "Team",
+        "due": [
+          "thursday"
+        ],
+        "priority": "MEDIUM"
+      },
+      {
+        "kw": [
+          "slides"
+        ],
+        "owner": "Priya",
+        "due": [
+          "next tuesday"
+        ],
+        "priority": "MEDIUM"
+      },
+      {
+        "kw": [
+          "readme"
+        ],
+        "owner": "Unassigned",
+        "due": [
+          null
+        ],
+        "priority": "LOW"
+      }
+    ],
+    "optional": [],
+    "decisions": [
+      {
+        "kw": [
+          "react",
+          "spring"
+        ]
+      },
+      {
+        "kw": [
+          "seminar"
+        ]
+      }
+    ]
+  }
+}

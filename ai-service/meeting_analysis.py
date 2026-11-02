@@ -1,12 +1,27 @@
 import json
+import os
 import re
+import time
 from typing import Any
 
 import requests
 
 
-OLLAMA_URL = "http://127.0.0.1:11434/api/chat"
-OLLAMA_MODEL = "qwen3:8b"
+# Where Ollama listens and which model to use. The environment variables
+# let you point to another computer or model without editing this file.
+OLLAMA_URL = os.getenv("OLLAMA_URL", "http://127.0.0.1:11434/api/chat")
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen3:8b")
+
+# Qwen3 reasons silently before it answers. For this task that reasoning added
+# 1.5 to 4 minutes per meeting and did not make the extraction better.
+OLLAMA_THINK = False
+
+# Ollama cuts off anything beyond its context window (4096 tokens by default),
+# so the window is sized to fit the transcript. See choose_context_size().
+CONTEXT_SIZES = (4096, 8192, 16384, 32768)
+ANSWER_TOKEN_RESERVE = 1500
+
+OLLAMA_TIMEOUT_SECONDS = 600
 
 
 # ============================================================
@@ -125,6 +140,17 @@ ACTION ITEM RULES:
 
 8. Do not invent owners or due dates.
 
+DUE DATE RULES:
+
+1. Copy the due date exactly as spoken, including words such as
+   "next", "this", "end of", and "before".
+   Example: "next Monday" stays "next Monday".
+
+2. The date can appear anywhere in the sentence, not only after "by".
+
+3. If the transcript gives no date for the task, use the JSON value
+   null. Never write the text "null", "none", or "N/A".
+
 PRIORITY RULES:
 
 1. HIGH priority requires explicit urgency, immediate business risk,
@@ -169,7 +195,7 @@ Return exactly this JSON structure:
     {
       "task": "Specific task",
       "owner": "Owner name, Team, or Unassigned",
-      "dueDate": "Explicit due date or null",
+      "dueDate": "Due date exactly as spoken, or null if the transcript gives none",
       "priority": "HIGH, MEDIUM, or LOW",
       "evidence": "Transcript evidence supporting this action item"
     }
@@ -428,6 +454,33 @@ def fallback_analysis(
 # LLM OUTPUT VALIDATION
 # ============================================================
 
+# Words the model sometimes writes as plain text instead of a real JSON null.
+EMPTY_VALUES = {
+    "",
+    "null",
+    "none",
+    "n/a",
+    "na",
+    "unknown",
+    "unspecified",
+    "not specified",
+    "tbd",
+}
+
+
+def clean_optional_text(value: Any) -> str | None:
+
+    if not isinstance(value, str):
+        return None
+
+    cleaned = value.strip()
+
+    if cleaned.lower() in EMPTY_VALUES:
+        return None
+
+    return cleaned
+
+
 def validate_analysis(
     analysis: dict[str, Any],
 ) -> dict[str, Any]:
@@ -546,12 +599,21 @@ def validate_analysis(
         )
 
 
+        if isinstance(priority, str):
+            priority = priority.strip().upper()
+
+
         if priority not in {
             "HIGH",
             "MEDIUM",
             "LOW",
         }:
             priority = "MEDIUM"
+
+
+        owner = clean_optional_text(owner) or "Unassigned"
+
+        due_date = clean_optional_text(due_date)
 
 
         evidence = action_item.get(
@@ -603,11 +665,53 @@ def validate_analysis(
 # OLLAMA LLM ANALYSIS
 # ============================================================
 
+def choose_context_size(transcript: str) -> int:
+
+    # English and Hindi/Marathi text both average roughly 4 bytes of UTF-8 per
+    # token. Dividing by 3 overestimates a little, which keeps a safety margin.
+    estimated_tokens = (
+        len(
+            (SYSTEM_PROMPT + transcript).encode("utf-8")
+        ) // 3
+    )
+
+    needed = estimated_tokens + ANSWER_TOKEN_RESERVE
+
+    for size in CONTEXT_SIZES:
+
+        if needed <= size:
+            return size
+
+    print(
+        "Transcript is longer than the largest context window "
+        f"({CONTEXT_SIZES[-1]} tokens); the start of it may be cut off"
+    )
+
+    return CONTEXT_SIZES[-1]
+
+
 def analyze_meeting_with_llm(
     transcript: str,
 ) -> dict[str, Any]:
 
     try:
+
+        context_size = choose_context_size(
+            transcript
+        )
+
+        request_options: dict[str, Any] = {
+            "temperature": 0.1,
+        }
+
+        # Short meetings use Ollama's own default window. Only a recording
+        # that does not fit in it asks for a larger one.
+        if context_size > CONTEXT_SIZES[0]:
+            request_options["num_ctx"] = context_size
+
+
+        started = time.time()
+
 
         response = requests.post(
             OLLAMA_URL,
@@ -645,14 +749,14 @@ def analyze_meeting_with_llm(
                 "format":
                     "json",
 
+                "think":
+                    OLLAMA_THINK,
+
                 "options":
-                    {
-                        "temperature":
-                            0.1,
-                    },
+                    request_options,
             },
 
-            timeout=300,
+            timeout=OLLAMA_TIMEOUT_SECONDS,
         )
 
 
@@ -686,9 +790,22 @@ def analyze_meeting_with_llm(
         )
 
 
-        return validate_analysis(
+        validated = validate_analysis(
             analysis
         )
+
+        validated["analysisSource"] = "LLM"
+
+
+        print(
+            "LLM meeting analysis finished in "
+            f"{time.time() - started:.0f}s "
+            f"(context {context_size} tokens, "
+            f"{len(validated['actionItems'])} action items)"
+        )
+
+
+        return validated
 
 
     except Exception as exception:
@@ -700,6 +817,11 @@ def analyze_meeting_with_llm(
         )
 
 
-        return fallback_analysis(
+        # The caller can tell the user that this result is of lower quality.
+        fallback = fallback_analysis(
             transcript
         )
+
+        fallback["analysisSource"] = "FALLBACK"
+
+        return fallback
