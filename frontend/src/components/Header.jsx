@@ -1,4 +1,9 @@
-function Header()
+import { LogOut } from 'lucide-react'
+
+import './AuthScreen.css'
+
+
+function Header({ user, onLogout })
 {
     return (
         <header className="header">
@@ -23,8 +28,34 @@ function Header()
 
             </div>
 
-            <div className="header-badge">
-                AI Powered
+            <div className="header-user">
+
+                <div className="header-badge">
+                    AI Powered
+                </div>
+
+                {
+                    user && (
+                        <>
+                            <span
+                                className="header-user-name"
+                                title={user.email}
+                            >
+                                {user.name}
+                            </span>
+
+                            <button
+                                type="button"
+                                className="logout-button"
+                                onClick={onLogout}
+                            >
+                                <LogOut size={13} />
+                                Log out
+                            </button>
+                        </>
+                    )
+                }
+
             </div>
 
         </header>

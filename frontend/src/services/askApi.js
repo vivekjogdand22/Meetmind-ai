@@ -1,4 +1,6 @@
-const API_BASE_URL = 'http://localhost:8080/api/meetings'
+import { apiFetch } from './session'
+
+const MEETINGS = '/meetings'
 
 
 async function readErrorMessage(response)
@@ -27,8 +29,8 @@ async function readErrorMessage(response)
 // with the exact words quoted from it.
 export async function askMeeting(meetingId, question)
 {
-    const response = await fetch(
-        `${API_BASE_URL}/${meetingId}/ask`,
+    const response = await apiFetch(
+        `${MEETINGS}/${meetingId}/ask`,
         {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

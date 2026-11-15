@@ -1,4 +1,6 @@
-const API_BASE_URL = 'http://localhost:8080/api/meetings'
+import { apiFetch } from './session'
+
+const MEETINGS = '/meetings'
 
 
 async function readErrorMessage(response)
@@ -28,8 +30,8 @@ async function request(meetingId, path, method = 'GET', body)
         options.body = JSON.stringify(body)
     }
 
-    const response = await fetch(
-        `${API_BASE_URL}/${meetingId}/plan${path}`,
+    const response = await apiFetch(
+        `${MEETINGS}/${meetingId}/plan${path}`,
         options
     )
 

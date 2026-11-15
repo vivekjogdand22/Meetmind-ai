@@ -1,9 +1,11 @@
-const API_BASE_URL = 'http://localhost:8080/api/meetings'
+import { apiFetch } from './session'
+
+const MEETINGS = '/meetings'
 
 
 export async function getAllMeetings()
 {
-    const response = await fetch(API_BASE_URL)
+    const response = await apiFetch(MEETINGS)
 
     if (!response.ok)
     {
@@ -21,8 +23,8 @@ export async function uploadMeeting(title, file)
     formData.append('title', title)
     formData.append('file', file)
 
-    const response = await fetch(
-        `${API_BASE_URL}/upload`,
+    const response = await apiFetch(
+        `${MEETINGS}/upload`,
         {
             method: 'POST',
             body: formData
@@ -56,8 +58,8 @@ export async function uploadMeeting(title, file)
 
 export async function deleteMeeting(id)
 {
-    const response = await fetch(
-        `${API_BASE_URL}/${id}`,
+    const response = await apiFetch(
+        `${MEETINGS}/${id}`,
         {
             method: 'DELETE'
         }

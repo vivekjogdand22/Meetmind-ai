@@ -5,6 +5,16 @@ import Header from './components/Header'
 import UploadMeeting from './components/UploadMeeting'
 import MeetingHistory from './components/MeetingHistory'
 import MeetingDetails from './components/MeetingDetails'
+import AuthScreen from './components/AuthScreen'
+
+import { getMe } from './services/authApi'
+
+import {
+    LOGGED_OUT_EVENT,
+    clearSession,
+    getSavedUser,
+    getToken
+} from './services/session'
 
 import {
     deleteMeeting,
@@ -13,7 +23,7 @@ import {
 } from './services/meetingApi'
 
 
-function App()
+function Workspace({ user, onLogout })
 {
     const [meetings, setMeetings] = useState([])
 
@@ -280,7 +290,10 @@ function App()
     return (
         <div className="app">
 
-            <Header />
+            <Header
+                user={user}
+                onLogout={onLogout}
+            />
 
 
             <main className="main-container">
@@ -443,6 +456,104 @@ function App()
 </footer>
 
         </div>
+    )
+}
+
+
+// Decides what to show: the login screen, or the workspace of the logged-in
+// user. Everything a user sees belongs to their account.
+function App()
+{
+    const [user, setUser] = useState(getSavedUser)
+
+    // a saved login is checked with the backend before it is trusted
+    const [checking, setChecking] = useState(() => Boolean(getToken()))
+
+    const [notice, setNotice] = useState('')
+
+
+    useEffect(() =>
+    {
+        if (!getToken())
+        {
+            return
+        }
+
+        getMe()
+            .then(setUser)
+            .catch((error) =>
+            {
+                setUser(null)
+
+                // a backend that cannot be reached is not a bad login
+                if (error instanceof TypeError)
+                {
+                    setNotice('Unable to reach the MeetMind backend. Is it running on port 8080?')
+                }
+            })
+            .finally(() => setChecking(false))
+    }, [])
+
+
+    useEffect(() =>
+    {
+        const handleLoggedOut = () =>
+        {
+            setUser(null)
+
+            setNotice('Your session has ended. Please log in again.')
+        }
+
+        window.addEventListener(LOGGED_OUT_EVENT, handleLoggedOut)
+
+        return () => window.removeEventListener(LOGGED_OUT_EVENT, handleLoggedOut)
+    }, [])
+
+
+    const handleLogout = () =>
+    {
+        clearSession()
+
+        setNotice('')
+
+        setUser(null)
+    }
+
+
+    if (checking)
+    {
+        return (
+            <main className="auth-page">
+                <span className="button-spinner" style={{ borderTopColor: '#4f46e5', borderColor: '#c7d2fe' }} />
+            </main>
+        )
+    }
+
+
+    if (!user)
+    {
+        return (
+            <AuthScreen
+                notice={notice}
+                onAuthenticated={(loggedInUser) =>
+                {
+                    setNotice('')
+
+                    setUser(loggedInUser)
+                }}
+            />
+        )
+    }
+
+
+    // "key" gives every account a fresh workspace, so nothing of the
+    // previous user stays on screen after a log out and a new login
+    return (
+        <Workspace
+            key={user.id}
+            user={user}
+            onLogout={handleLogout}
+        />
     )
 }
 
