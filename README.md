@@ -343,26 +343,6 @@ The Vite dev server listens on `localhost`, so open `http://localhost:5173` (typ
 - Ask Your Meeting quality (needs Ollama with both models): `python eval/run_qa_eval.py --answers` from the `ai-service` folder grades 28 questions, including ones the meeting does not answer. The number that must stay at 0 is *invented answers*.
 
 ---
-## 🚀 Future Improvements
-
-The following enhancements are planned for future versions of MeetMind AI:
-
-- 🔍 Search meetings by title or keyword
-- 📄 Export meeting summary as PDF
-- 📑 Export transcript as DOCX
-- 📊 Meeting analytics dashboard
-- 👥 Speaker identification
-- 🔐 User authentication and authorization
-- ☁ Cloud deployment (AWS/Azure/GCP)
-- 📱 Responsive mobile-first interface
-- 🌍 Multi-language transcription and translation
-- 🔔 Email notifications for action items
-- 📅 Calendar integration (Google Calendar / Outlook)
-- 📈 Team productivity insights
-- 🤖 Support for additional AI models
-- ⚡ Real-time meeting transcription
-
----
 ## 👨‍💻 Developed By
 
 **Vivek Jogdand**
