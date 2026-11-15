@@ -6,6 +6,8 @@ import UploadMeeting from './components/UploadMeeting'
 import MeetingHistory from './components/MeetingHistory'
 import MeetingDetails from './components/MeetingDetails'
 import AuthScreen from './components/AuthScreen'
+import AccountPanel from './components/AccountPanel'
+import RecoveryCodeScreen from './components/RecoveryCode'
 
 import { getMe } from './services/authApi'
 
@@ -23,8 +25,10 @@ import {
 } from './services/meetingApi'
 
 
-function Workspace({ user, onLogout })
+function Workspace({ user, onLogout, onUserChange })
 {
+    const [accountOpen, setAccountOpen] = useState(false)
+
     const [meetings, setMeetings] = useState([])
 
     const [selectedMeeting, setSelectedMeeting] =
@@ -293,7 +297,18 @@ function Workspace({ user, onLogout })
             <Header
                 user={user}
                 onLogout={onLogout}
+                onOpenAccount={() => setAccountOpen(true)}
             />
+
+            {
+                accountOpen && (
+                    <AccountPanel
+                        user={user}
+                        onClose={() => setAccountOpen(false)}
+                        onUserChange={onUserChange}
+                    />
+                )
+            }
 
 
             <main className="main-container">
@@ -471,6 +486,9 @@ function App()
 
     const [notice, setNotice] = useState('')
 
+    // shown once after sign-up or a password reset, then gone for good
+    const [recoveryCode, setRecoveryCode] = useState('')
+
 
     useEffect(() =>
     {
@@ -535,12 +553,26 @@ function App()
         return (
             <AuthScreen
                 notice={notice}
-                onAuthenticated={(loggedInUser) =>
+                onAuthenticated={(loggedInUser, newRecoveryCode) =>
                 {
                     setNotice('')
 
+                    setRecoveryCode(newRecoveryCode || '')
+
                     setUser(loggedInUser)
                 }}
+            />
+        )
+    }
+
+
+    if (recoveryCode)
+    {
+        return (
+            <RecoveryCodeScreen
+                code={recoveryCode}
+                email={user.email}
+                onContinue={() => setRecoveryCode('')}
             />
         )
     }
@@ -553,6 +585,7 @@ function App()
             key={user.id}
             user={user}
             onLogout={handleLogout}
+            onUserChange={setUser}
         />
     )
 }

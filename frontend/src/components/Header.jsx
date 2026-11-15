@@ -1,9 +1,9 @@
-import { LogOut } from 'lucide-react'
+import { KeyRound, LogOut } from 'lucide-react'
 
 import './AuthScreen.css'
 
 
-function Header({ user, onLogout })
+function Header({ user, onLogout, onOpenAccount })
 {
     return (
         <header className="header">
@@ -43,6 +43,16 @@ function Header({ user, onLogout })
                             >
                                 {user.name}
                             </span>
+
+                            <button
+                                type="button"
+                                className={user.hasRecoveryCode ? 'logout-button' : 'logout-button needs-attention'}
+                                onClick={onOpenAccount}
+                                title={user.hasRecoveryCode ? 'Password and recovery code' : 'You have no recovery code: a forgotten password could not be reset'}
+                            >
+                                <KeyRound size={13} />
+                                {user.hasRecoveryCode ? 'Account' : 'Get a recovery code'}
+                            </button>
 
                             <button
                                 type="button"

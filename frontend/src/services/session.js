@@ -72,6 +72,13 @@ export function saveSession(token, user)
 }
 
 
+// The same login, with fresh details about the user.
+export function saveUser(user)
+{
+    write(USER_KEY, JSON.stringify(user))
+}
+
+
 export function clearSession()
 {
     write(TOKEN_KEY, null)

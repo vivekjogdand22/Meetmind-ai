@@ -4,7 +4,7 @@ import { LogIn, UserPlus } from 'lucide-react'
 
 import './AuthScreen.css'
 
-import { login, register } from '../services/authApi'
+import { login, register, resetPassword } from '../services/authApi'
 
 import { describeError } from '../utils/planUtils'
 
@@ -24,11 +24,15 @@ function AuthScreen({ notice, onAuthenticated })
 
     const [password, setPassword] = useState('')
 
+    const [recoveryCode, setRecoveryCode] = useState('')
+
     const [busy, setBusy] = useState(false)
 
     const [error, setError] = useState('')
 
     const creating = mode === 'register'
+
+    const resetting = mode === 'reset'
 
 
     function switchMode(newMode)
@@ -48,7 +52,7 @@ function AuthScreen({ notice, onAuthenticated })
             return
         }
 
-        if (creating && password.length < MIN_PASSWORD_LENGTH)
+        if ((creating || resetting) && password.length < MIN_PASSWORD_LENGTH)
         {
             setError(`The password must have at least ${MIN_PASSWORD_LENGTH} characters.`)
 
@@ -60,11 +64,14 @@ function AuthScreen({ notice, onAuthenticated })
 
         try
         {
-            const user = creating
+            const { user, recoveryCode: newCode } = creating
                 ? await register(name.trim(), email.trim(), password)
-                : await login(email.trim(), password)
+                : resetting
+                    ? await resetPassword(email.trim(), recoveryCode, password)
+                    : await login(email.trim(), password)
 
-            onAuthenticated(user)
+            // a new recovery code (sign-up or reset) is shown once by the parent
+            onAuthenticated(user, newCode)
         }
         catch (requestError)
         {
@@ -95,7 +102,21 @@ function AuthScreen({ notice, onAuthenticated })
                 </div>
 
 
-                <div className="auth-tabs" role="tablist">
+                {
+                    resetting && (
+                        <div className="reset-heading">
+                            <h2>Reset your password</h2>
+
+                            <p>
+                                Enter your email, the recovery code you saved when
+                                you created your account, and a new password.
+                            </p>
+                        </div>
+                    )
+                }
+
+
+                <div className="auth-tabs" role="tablist" hidden={resetting}>
 
                     <button
                         type="button"
@@ -163,15 +184,33 @@ function AuthScreen({ notice, onAuthenticated })
                         />
                     </label>
 
+                    {
+                        resetting && (
+                            <label>
+                                <span>Recovery code</span>
+
+                                <input
+                                    type="text"
+                                    required
+                                    value={recoveryCode}
+                                    autoComplete="off"
+                                    spellCheck={false}
+                                    placeholder="XXXXX-XXXXX-XXXXX-XXXXX"
+                                    onChange={(event) => setRecoveryCode(event.target.value)}
+                                />
+                            </label>
+                        )
+                    }
+
                     <label>
-                        <span>Password</span>
+                        <span>{resetting ? 'New password' : 'Password'}</span>
 
                         <input
                             type="password"
                             required
                             value={password}
-                            autoComplete={creating ? 'new-password' : 'current-password'}
-                            placeholder={creating ? `At least ${MIN_PASSWORD_LENGTH} characters` : 'Your password'}
+                            autoComplete={creating || resetting ? 'new-password' : 'current-password'}
+                            placeholder={creating || resetting ? `At least ${MIN_PASSWORD_LENGTH} characters` : 'Your password'}
                             onChange={(event) => setPassword(event.target.value)}
                         />
                     </label>
@@ -191,8 +230,32 @@ function AuthScreen({ notice, onAuthenticated })
                     >
                         {busy && <span className="button-spinner" />}
 
-                        {creating ? 'Create account' : 'Log in'}
+                        {creating ? 'Create account' : resetting ? 'Reset password' : 'Log in'}
                     </button>
+
+                    {
+                        mode === 'login' && (
+                            <button
+                                type="button"
+                                className="auth-link"
+                                onClick={() => switchMode('reset')}
+                            >
+                                Forgot your password?
+                            </button>
+                        )
+                    }
+
+                    {
+                        resetting && (
+                            <button
+                                type="button"
+                                className="auth-link"
+                                onClick={() => switchMode('login')}
+                            >
+                                Back to log in
+                            </button>
+                        )
+                    }
 
                 </form>
 

@@ -1,4 +1,4 @@
-import { apiFetch, saveSession } from './session'
+import { apiFetch, saveSession, saveUser } from './session'
 
 
 async function readMessage(response, fallback)
@@ -16,7 +16,7 @@ async function readMessage(response, fallback)
 }
 
 
-async function authenticate(path, body, fallback)
+async function post(path, body, fallback)
 {
     const response = await apiFetch(
         path,
@@ -32,11 +32,19 @@ async function authenticate(path, body, fallback)
         throw new Error(await readMessage(response, fallback))
     }
 
-    const { token, user } = await response.json()
+    return response.json()
+}
+
+
+// Logs in with whatever the backend answered. "recoveryCode" is only there
+// when a new one was just made: it is shown once and never again.
+async function authenticate(path, body, fallback)
+{
+    const { token, user, recoveryCode } = await post(path, body, fallback)
 
     saveSession(token, user)
 
-    return user
+    return { user, recoveryCode: recoveryCode || null }
 }
 
 
@@ -60,6 +68,41 @@ export function login(email, password)
 }
 
 
+// Forgot the password: the recovery code sets a new one and logs in.
+export function resetPassword(email, recoveryCode, newPassword)
+{
+    return authenticate(
+        '/auth/reset-password',
+        { email, recoveryCode, newPassword },
+        'The password could not be reset'
+    )
+}
+
+
+// Every other login of this account ends; this browser gets a new token.
+export function changePassword(currentPassword, newPassword)
+{
+    return authenticate(
+        '/auth/change-password',
+        { currentPassword, newPassword },
+        'The password could not be changed'
+    )
+}
+
+
+// A new one-time recovery code (the old one stops working).
+export async function createRecoveryCode(password)
+{
+    const { recoveryCode } = await post(
+        '/auth/recovery-code',
+        { password },
+        'The recovery code could not be created'
+    )
+
+    return recoveryCode
+}
+
+
 // Asks the backend who the saved token belongs to. Throws if the token is no
 // longer good.
 export async function getMe()
@@ -71,5 +114,9 @@ export async function getMe()
         throw new Error(await readMessage(response, 'Please log in.'))
     }
 
-    return response.json()
+    const user = await response.json()
+
+    saveUser(user)
+
+    return user
 }
