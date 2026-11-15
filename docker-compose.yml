@@ -53,6 +53,7 @@ services:
       DB_URL: jdbc:postgresql://postgres:5432/meetmind_db
       DB_USERNAME: meetmind_user
       DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET:-}
       AI_SERVICE_URL: http://ai-service:8000
       MEETMIND_UPLOAD_DIR: /data/uploads
     volumes:

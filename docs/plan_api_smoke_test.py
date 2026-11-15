@@ -1,9 +1,10 @@
 """Walks through the whole project-plan API of a running backend and checks
 every answer. It creates its own test meeting and deletes it again at the end.
 
-Start PostgreSQL and the backend first, then from the project folder:
+Start PostgreSQL and the backend first. The API needs a login, so give the
+email and password of an account you already created in the app:
 
-    python3 docs/plan_api_smoke_test.py
+    MEETMIND_EMAIL=you@example.com MEETMIND_PASSWORD=your-password python3 docs/plan_api_smoke_test.py
 
 It uses http://localhost:8080 unless you give another address:
 
@@ -13,6 +14,7 @@ Only the Python standard library is needed.
 """
 
 import json
+import os
 import sys
 import urllib.error
 import urllib.request
@@ -34,6 +36,9 @@ ACTION_ITEMS = [
 checks = 0
 failures: list[str] = []
 
+# the login token, set by log_in() before the first call that needs it
+TOKEN = None
+
 
 # ============================================================
 # HELPERS
@@ -49,7 +54,7 @@ def call(method, path, body=None, raw_body=None):
         BASE + path,
         data=data,
         method=method,
-        headers={"Content-Type": "application/json"},
+        headers={"Content-Type": "application/json", **({"Authorization": f"Bearer {TOKEN}"} if TOKEN else {})},
     )
 
     try:
@@ -98,9 +103,32 @@ def message_of(body):
 # THE WALK-THROUGH
 # ============================================================
 
+def log_in():
+
+    global TOKEN
+
+    email = os.environ.get("MEETMIND_EMAIL")
+    password = os.environ.get("MEETMIND_PASSWORD")
+
+    if not email or not password:
+        sys.exit(
+            "The API needs a login. Run it like this (use an account you created in the app):\n\n"
+            "    MEETMIND_EMAIL=you@example.com MEETMIND_PASSWORD=your-password python3 docs/plan_api_smoke_test.py"
+        )
+
+    status, body = call("POST", "/api/auth/login", {"email": email, "password": password})
+
+    if status != 200:
+        sys.exit(f"Login failed (status {status}): {body and body.get('message')}")
+
+    TOKEN = body["token"]
+
+
 def main():
 
     print(f"Project-plan API smoke test against {BASE}\n")
+
+    log_in()
 
     print("Setup")
     status, meeting = call("POST", "/api/meetings", {

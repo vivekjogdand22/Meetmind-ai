@@ -177,6 +177,8 @@ You should see `Local:   http://localhost:5173/`.
 open http://localhost:5173
 ```
 
+The first time, you see a login screen. Click **Create account**, type your name, email and a password of at least 8 characters, and click **Create account**. If you uploaded meetings before this version existed, this first account receives them. Next time, use **Log in**.
+
 Your browser opens MeetMind. Always use `localhost`, not `127.0.0.1`.
 
 ### Step 7. Check that everything is running

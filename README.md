@@ -15,6 +15,7 @@ AI-powered meeting intelligence platform that converts meeting recordings into s
 - 🔥 Priority detection
 - 📚 Meeting history, with a search box (title, summary, decisions, action items or anything said) and a delete button on every meeting
 - 🗑 Delete a meeting (removes its recording, results and plan)
+- 🔐 **Accounts**: register and log in; every meeting, plan and answer belongs to one account and nobody else can see it
 - 💬 **Ask Your Meeting**: ask a question about one meeting and get an answer taken only from its transcript, with the exact quoted evidence, or "Not discussed"
 - 📖 **API documentation** with a try-it-out page: start the backend and open http://localhost:8080/swagger-ui.html
 - 📄 **Export** a meeting report (summary, decisions, action items and the full transcript) as a **PDF** or a **Word** file from the meeting header. The PDF supports Western European languages only (other scripts show as `?`); the Word file keeps every language
@@ -269,7 +270,7 @@ One command starts the database, the AI service, the backend and the website. Yo
 
 1. Install and start **Docker Desktop**.
 2. Start Ollama and download both models once (see step 4 of the installation above).
-3. Create your settings file, then open `.env` and replace `change-me` with a password of your choice:
+3. Create your settings file, then open `.env`, replace `change-me` with a database password of your choice and put a secret after `JWT_SECRET=`:
 
 ```bash
 cp .env.example .env
@@ -303,6 +304,20 @@ Every meeting has a **Project Plan** panel under its action items. It turns the 
 6. **What if a task is late?** Pick a task and a delay. The panel says whether the finish date moves, which tasks finish later, and shows the timeline as it would look. This is only a simulation: nothing is saved.
 
 The plan is a copy of the action items. Editing it does not change the list the AI extracted, and deleting a meeting deletes its plan. The endpoints are described in `docs/project-plan-api.md`.
+
+---
+## 🔐 Accounts and Privacy
+
+The first time you open the app you see a login screen. Choose **Create account** (name, email, a password of at least 8 characters). After that, **Log in** with the same email and password; the **Log out** button is in the header.
+
+- **Every account is private.** You only ever see your own meetings, project plans and answers. Another account cannot open, change or delete them: for it they simply do not exist.
+- **Meetings from before accounts.** If you already uploaded meetings before this version, the **first account you create** receives all of them. Create your own account first.
+- **Sessions.** A login lasts 12 hours (change it with `JWT_HOURS`). After that you log in again.
+- **Passwords** are stored only as a BCrypt hash, never as text.
+- **`JWT_SECRET`.** Logins are signed with a secret of at least 32 characters. Set it in `backend/.env` (for example `JWT_SECRET=` followed by the result of `openssl rand -base64 32`). Without it the backend makes a random one at every start, so everybody has to log in again after each restart. The Docker setup reads it from the `.env` file next to `docker-compose.yml`.
+- **API users:** log in with `POST /api/auth/login`, then send `Authorization: Bearer <token>` with every request. The Swagger page has an **Authorize** button for this.
+
+There is no password reset and no limit on login attempts yet; this is a project for use on your own computer or network, not a public website.
 
 ---
 ## 💬 Using Ask Your Meeting
@@ -361,9 +376,9 @@ The Vite dev server listens on `localhost`, so open `http://localhost:5173` (typ
 ---
 ## 🧪 Tests
 
-- Backend (88 tests, no PostgreSQL, password, Whisper or Ollama needed: they use an in-memory database and a stand-in for the AI service, and cover the whole upload pipeline): `cd backend && ./mvnw test`
+- Backend (110 tests, no PostgreSQL, password, Whisper or Ollama needed: they use an in-memory database and a stand-in for the AI service, and cover the whole upload pipeline): `cd backend && ./mvnw test`
 - AI service logic (119 tests, no Ollama needed): `cd ai-service && python -m unittest discover -s tests -v`
-- Project-plan API against real PostgreSQL and a running backend: `python3 docs/plan_api_smoke_test.py`. The endpoints are described in `docs/project-plan-api.md`.
+- Project-plan API against real PostgreSQL and a running backend: `MEETMIND_EMAIL=you@example.com MEETMIND_PASSWORD=your-password python3 docs/plan_api_smoke_test.py` (use an account you created in the app). The endpoints are described in `docs/project-plan-api.md`.
 - AI extraction quality: start the AI service, then run `python eval/run_eval.py` from the `ai-service` folder. See `ai-service/eval/README.md`.
 - Ask Your Meeting quality (needs Ollama with both models): `python eval/run_qa_eval.py --answers` from the `ai-service` folder grades 28 questions, including ones the meeting does not answer. The number that must stay at 0 is *invented answers*.
 

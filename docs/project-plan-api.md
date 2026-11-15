@@ -10,6 +10,10 @@ AI action items  ->  plan tasks (a copy)  ->  you add estimates and dependencies
 All durations are in **days** (decimals such as `0.5` are fine). Every endpoint
 lives under `/api/meetings/{meetingId}/plan`.
 
+**You must be logged in.** Every request needs the header `Authorization: Bearer <token>`
+(get the token from `POST /api/auth/login`). The meeting has to belong to your account;
+somebody else's meeting answers `404 Not Found`.
+
 ## Ideas in one minute
 
 | Term | Meaning |
@@ -136,8 +140,10 @@ Every error has the same shape. `message` is written for people.
 With PostgreSQL and the backend running, this walks through every endpoint and
 checks the answers (it creates its own test meeting and removes it at the end):
 
+It logs in with an account you created in the app:
+
 ```bash
-python3 docs/plan_api_smoke_test.py
+MEETMIND_EMAIL=you@example.com MEETMIND_PASSWORD=your-password python3 docs/plan_api_smoke_test.py
 ```
 
 Unit tests that need no database:
