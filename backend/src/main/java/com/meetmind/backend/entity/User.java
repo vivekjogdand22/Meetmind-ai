@@ -32,6 +32,15 @@ public class User
 
     private Instant createdAt = Instant.now();
 
+    // BCrypt hash of the one-time recovery code (never the code itself).
+    // Empty for accounts that never asked for one.
+    private String recoveryCodeHash;
+
+    // Goes up whenever the password changes. Login tokens carry the number
+    // they were issued with, so changing the password ends every other login.
+    @Column(columnDefinition = "integer default 0 not null")
+    private int tokenVersion = 0;
+
 
     public Long getId()
     {
@@ -71,5 +80,26 @@ public class User
     public Instant getCreatedAt()
     {
         return createdAt;
+    }
+
+
+    public String getRecoveryCodeHash()
+    {
+        return recoveryCodeHash;
+    }
+
+    public void setRecoveryCodeHash(String recoveryCodeHash)
+    {
+        this.recoveryCodeHash = recoveryCodeHash;
+    }
+
+    public int getTokenVersion()
+    {
+        return tokenVersion;
+    }
+
+    public void setTokenVersion(int tokenVersion)
+    {
+        this.tokenVersion = tokenVersion;
     }
 }

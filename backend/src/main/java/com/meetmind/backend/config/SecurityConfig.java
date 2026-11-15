@@ -1,5 +1,7 @@
 package com.meetmind.backend.config;
 
+import com.meetmind.backend.repository.UserRepository;
+
 import com.nimbusds.jose.jwk.source.ImmutableSecret;
 
 import org.slf4j.Logger;
@@ -15,9 +17,15 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
+import org.springframework.security.oauth2.core.OAuth2Error;
+import org.springframework.security.oauth2.core.OAuth2TokenValidator;
+import org.springframework.security.oauth2.core.OAuth2TokenValidatorResult;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
+import org.springframework.security.oauth2.jwt.JwtValidators;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
@@ -75,6 +83,7 @@ public class SecurityConfig
                                 .requestMatchers(
                                         "/api/auth/register",
                                         "/api/auth/login",
+                                        "/api/auth/reset-password",
                                         "/api/health",
                                         "/actuator/health",
                                         "/actuator/health/**",
@@ -140,9 +149,46 @@ public class SecurityConfig
     }
 
 
+    // A token is good only while its account exists and the password has not
+    // been changed since it was issued (the number "tv" in the token must
+    // still be the number of the account).
     @Bean
-    public JwtDecoder jwtDecoder(SecretKey jwtKey)
+    public JwtDecoder jwtDecoder(SecretKey jwtKey, UserRepository userRepository)
     {
-        return NimbusJwtDecoder.withSecretKey(jwtKey).macAlgorithm(MacAlgorithm.HS256).build();
+        NimbusJwtDecoder decoder =
+                NimbusJwtDecoder.withSecretKey(jwtKey).macAlgorithm(MacAlgorithm.HS256).build();
+
+        OAuth2TokenValidator<Jwt> stillValid =
+                jwt ->
+                {
+                    boolean good = false;
+
+                    try
+                    {
+                        Number version = jwt.getClaim("tv");
+
+                        good =
+                                version != null
+                                        && userRepository
+                                        .findById(Long.valueOf(jwt.getSubject()))
+                                        .filter(user -> user.getTokenVersion() == version.intValue())
+                                        .isPresent();
+                    }
+                    catch (RuntimeException exception)
+                    {
+                        // a malformed subject or claim: not a token of ours
+                    }
+
+                    return good
+                            ? OAuth2TokenValidatorResult.success()
+                            : OAuth2TokenValidatorResult.failure(
+                                    new OAuth2Error("invalid_token", "This login is no longer valid.", null));
+                };
+
+        decoder.setJwtValidator(
+                new DelegatingOAuth2TokenValidator<>(JwtValidators.createDefault(), stillValid)
+        );
+
+        return decoder;
     }
 }

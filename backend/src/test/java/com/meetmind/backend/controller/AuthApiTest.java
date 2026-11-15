@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.meetmind.backend.entity.Meeting;
 import com.meetmind.backend.repository.MeetingRepository;
 import com.meetmind.backend.repository.UserRepository;
+import com.meetmind.backend.security.LoginThrottle;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -54,10 +55,15 @@ class AuthApiTest
     @Autowired
     private JwtEncoder jwtEncoder;
 
+    @Autowired
+    private LoginThrottle throttle;
+
 
     @BeforeEach
     void emptyDatabase()
     {
+        throttle.clearAll();
+
         meetingRepository.deleteAll();
 
         userRepository.deleteAll();

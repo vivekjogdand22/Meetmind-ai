@@ -32,6 +32,17 @@ public class AuthExceptionHandler
     }
 
 
+    // Too many wrong tries: the browser is told how long to wait.
+    @ExceptionHandler(TooManyAttemptsException.class)
+    public ResponseEntity<ApiError> handleTooMany(TooManyAttemptsException exception)
+    {
+        return ResponseEntity
+                .status(429)
+                .header("Retry-After", String.valueOf(exception.getRetryAfterSeconds()))
+                .body(new ApiError(429, "Too Many Requests", exception.getMessage()));
+    }
+
+
     private static ResponseEntity<ApiError> reply(int status, String error, String message)
     {
         return ResponseEntity
