@@ -2,6 +2,7 @@ package com.meetmind.backend.controller;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.meetmind.backend.WithJwtUser;
 import com.meetmind.backend.entity.Meeting;
 import com.meetmind.backend.repository.MeetingRepository;
 import com.sun.net.httpserver.HttpServer;
@@ -35,6 +36,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@WithJwtUser
 class MeetingAskApiTest
 {
     private static final String TRANSCRIPT =
@@ -158,6 +160,8 @@ class MeetingAskApiTest
         meeting.setTitle("Ask test");
 
         meeting.setTranscript(transcript);
+
+        meeting.setOwnerId(WithJwtUser.DEFAULT_USER_ID);
 
         return meetingRepository.save(meeting).getId();
     }

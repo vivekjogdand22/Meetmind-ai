@@ -51,30 +51,46 @@ public class MeetingService
     }
 
 
-    public Meeting saveMeeting(Meeting meeting)
+    // Every method below works on the meetings of ONE user. A meeting that
+    // belongs to somebody else is reported as "not found".
+
+    public Meeting requireOwned(
+            Long id,
+            Long ownerId)
     {
+        return meetingRepository
+                .findByIdAndOwnerId(id, ownerId)
+                .orElseThrow(
+                        () -> new MeetingNotFoundException(
+                                "Meeting " + id + " was not found."
+                        )
+                );
+    }
+
+
+    public Meeting saveMeeting(
+            Meeting meeting,
+            Long ownerId)
+    {
+        meeting.setOwnerId(ownerId);
+
         return meetingRepository.save(meeting);
     }
 
 
-    public List<Meeting> getAllMeetings()
+    public List<Meeting> getAllMeetings(Long ownerId)
     {
-        return meetingRepository.findAll();
+        return meetingRepository.findByOwnerIdOrderByIdAsc(ownerId);
     }
 
 
     public Meeting updateMeeting(
             Long id,
-            Meeting updatedMeeting)
+            Meeting updatedMeeting,
+            Long ownerId)
     {
         Meeting existingMeeting =
-                meetingRepository
-                        .findById(id)
-                        .orElseThrow(
-                                () -> new RuntimeException(
-                                        "Meeting not found"
-                                )
-                        );
+                requireOwned(id, ownerId);
 
 
         existingMeeting.setTitle(
@@ -110,7 +126,8 @@ public class MeetingService
 
     public AskDto.Answer askQuestion(
             Long id,
-            String question)
+            String question,
+            Long ownerId)
     {
         String cleanQuestion =
                 question == null ? "" : question.strip();
@@ -133,13 +150,7 @@ public class MeetingService
 
 
         Meeting meeting =
-                meetingRepository
-                        .findById(id)
-                        .orElseThrow(
-                                () -> new MeetingNotFoundException(
-                                        "Meeting " + id + " was not found."
-                                )
-                        );
+                requireOwned(id, ownerId);
 
         if (meeting.getTranscript() == null
                 || meeting.getTranscript().isBlank())
@@ -157,16 +168,12 @@ public class MeetingService
     }
 
 
-    public void deleteMeeting(Long id)
+    public void deleteMeeting(
+            Long id,
+            Long ownerId)
     {
         Meeting meeting =
-                meetingRepository
-                        .findById(id)
-                        .orElseThrow(
-                                () -> new RuntimeException(
-                                        "Meeting not found"
-                                )
-                        );
+                requireOwned(id, ownerId);
 
 
         if (meeting.getFileName() != null)
@@ -195,7 +202,8 @@ public class MeetingService
 
     public Meeting uploadMeeting(
             String title,
-            MultipartFile file)
+            MultipartFile file,
+            Long ownerId)
             throws IOException
     {
         validateUploadedFile(file);
@@ -242,6 +250,8 @@ public class MeetingService
                         storedFileName
                 );
 
+
+        meeting.setOwnerId(ownerId);
 
         meeting =
                 meetingRepository.save(

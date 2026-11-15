@@ -1,5 +1,6 @@
 package com.meetmind.backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -41,6 +42,13 @@ public class Meeting
     // because the language model was not available. Empty for meetings
     // that were analyzed before this field existed.
     private String analysisSource;
+
+    // The user who owns this meeting. Empty only for meetings that existed
+    // before accounts did; the first account that is created claims them.
+    // Never sent to or accepted from the browser.
+    @JsonIgnore
+    @Column(name = "owner_id")
+    private Long ownerId;
 
 
     public Meeting()
@@ -177,5 +185,18 @@ public class Meeting
     public void setAnalysisSource(String analysisSource)
     {
         this.analysisSource = analysisSource;
+    }
+
+
+    @JsonIgnore
+    public Long getOwnerId()
+    {
+        return ownerId;
+    }
+
+    @JsonIgnore
+    public void setOwnerId(Long ownerId)
+    {
+        this.ownerId = ownerId;
     }
 }

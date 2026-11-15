@@ -2,6 +2,7 @@ package com.meetmind.backend.controller;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.meetmind.backend.WithJwtUser;
 import com.meetmind.backend.entity.Meeting;
 import com.meetmind.backend.repository.MeetingRepository;
 import com.meetmind.backend.repository.PlanTaskRepository;
@@ -39,6 +40,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@WithJwtUser
 class PlanApiIntegrationTest
 {
     private static final String ACTION_ITEMS = """
@@ -90,6 +92,8 @@ class PlanApiIntegrationTest
         meeting.setTitle("Plan API test");
         meeting.setActionItems(ACTION_ITEMS);
         meeting.setStatus("COMPLETED");
+
+        meeting.setOwnerId(WithJwtUser.DEFAULT_USER_ID);
 
         meetingId = meetingRepository.save(meeting).getId();
 
