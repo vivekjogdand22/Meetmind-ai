@@ -1,0 +1,73 @@
+# Runs the whole of MeetMind with one command:
+#
+#     docker compose up --build
+#
+# Then open http://localhost:5173
+#
+# Ollama (the language model) is NOT started here. Keep running it on your
+# computer (it uses your GPU there); the AI service reaches it through
+# host.docker.internal. Download the models once with:
+#     ollama pull qwen3:8b
+#     ollama pull nomic-embed-text
+
+services:
+
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: meetmind_db
+      POSTGRES_USER: meetmind_user
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Create a file named .env next to docker-compose.yml with a line DB_PASSWORD=choose-a-password}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U meetmind_user -d meetmind_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  ai-service:
+    build: ./ai-service
+    environment:
+      OLLAMA_URL: http://host.docker.internal:11434/api/chat
+      OLLAMA_EMBED_URL: http://host.docker.internal:11434/api/embed
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - whisper-cache:/models
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
+
+  backend:
+    build: ./backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+      ai-service:
+        condition: service_started
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/meetmind_db
+      DB_USERNAME: meetmind_user
+      DB_PASSWORD: ${DB_PASSWORD}
+      AI_SERVICE_URL: http://ai-service:8000
+      MEETMIND_UPLOAD_DIR: /data/uploads
+    volumes:
+      - uploads:/data/uploads
+    ports:
+      - "8080:8080"
+
+  frontend:
+    build: ./frontend
+    depends_on:
+      - backend
+    ports:
+      - "5173:80"
+
+volumes:
+  pgdata:
+  uploads:
+  whisper-cache:
