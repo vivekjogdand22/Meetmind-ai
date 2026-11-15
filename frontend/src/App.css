@@ -2023,3 +2023,82 @@ button {
     outline: 2px solid #f87171;
     outline-offset: 2px;
 }
+
+
+/* search box above the meeting list */
+.history-search {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+    padding: 0 14px;
+    border: 1px solid #dbe2ea;
+    border-radius: 12px;
+    background: white;
+    color: #94a3b8;
+}
+
+.history-search:focus-within {
+    border-color: #4f46e5;
+    outline: 2px solid #c7d2fe;
+}
+
+.history-search input {
+    flex: 1;
+    min-width: 0;
+    padding: 12px 0;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: #334155;
+    font: inherit;
+    font-size: 13px;
+}
+
+.history-search-clear {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border: none;
+    border-radius: 50%;
+    background: #f1f5f9;
+    color: #64748b;
+    cursor: pointer;
+}
+
+.history-search-clear:hover {
+    background: #e2e8f0;
+}
+
+
+/* PDF and Word export buttons in the meeting header */
+.export-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 11px;
+    border: 1px solid #c7d2fe;
+    border-radius: 9px;
+    background: white;
+    color: #4338ca;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.export-button:hover:not(:disabled) {
+    background: #eef2ff;
+}
+
+.export-button:disabled {
+    opacity: 0.6;
+    cursor: wait;
+}
+
+.export-button:focus-visible {
+    outline: 2px solid #818cf8;
+    outline-offset: 2px;
+}

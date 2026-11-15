@@ -1,8 +1,19 @@
-import { Trash2 } from 'lucide-react'
+import { useState } from 'react'
+
+import { Search, Trash2, X } from 'lucide-react'
+
+import { filterMeetings } from '../utils/searchUtils'
 
 
 function MeetingHistory({ meetings, selectedMeeting, onSelectMeeting, onDeleteMeeting, loading })
 {
+    const [query, setQuery] = useState('')
+
+    const shownMeetings = filterMeetings(meetings, query)
+
+    const isSearching = query.trim() !== ''
+
+
     const formatFileSize = (bytes) =>
     {
         if (!bytes)
@@ -72,12 +83,51 @@ function MeetingHistory({ meetings, selectedMeeting, onSelectMeeting, onDeleteMe
                 </div>
 
                 <div className="meeting-count">
-                    {meetings.length}
+                    {
+                        isSearching
+                            ? `${shownMeetings.length} of ${meetings.length}`
+                            : meetings.length
+                    }
                     {' '}
                     {meetings.length === 1 ? 'meeting' : 'meetings'}
                 </div>
 
             </div>
+
+
+            {
+                meetings.length > 0 && (
+                    <div className="history-search">
+
+                        <Search size={16} />
+
+                        <input
+                            type="text"
+                            value={query}
+                            placeholder="Search by title, keyword, name or anything said..."
+                            aria-label="Search meetings"
+                            onChange={
+                                (event) =>
+                                    setQuery(event.target.value)
+                            }
+                        />
+
+                        {
+                            query && (
+                                <button
+                                    type="button"
+                                    className="history-search-clear"
+                                    aria-label="Clear search"
+                                    onClick={() => setQuery('')}
+                                >
+                                    <X size={14} />
+                                </button>
+                            )
+                        }
+
+                    </div>
+                )
+            }
 
 
             {
@@ -114,11 +164,21 @@ function MeetingHistory({ meetings, selectedMeeting, onSelectMeeting, onDeleteMe
                             </div>
                         )
                         :
+                        shownMeetings.length === 0
+                            ?
+                            (
+                                <div className="history-message">
+                                    <p>
+                                        No meetings match “{query.trim()}”.
+                                    </p>
+                                </div>
+                            )
+                            :
                         (
                             <div className="meeting-list">
 
                                 {
-                                    meetings.map((meeting) =>
+                                    shownMeetings.map((meeting) =>
                                     {
                                         const isSelected =
                                             selectedMeeting?.id === meeting.id

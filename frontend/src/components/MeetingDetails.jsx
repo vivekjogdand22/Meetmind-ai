@@ -10,6 +10,7 @@ import {
 } from 'lucide-react'
 
 import AskMeeting from './AskMeeting'
+import ExportButtons from './ExportButtons'
 import ProjectPlan from './ProjectPlan'
 
 
@@ -118,6 +119,8 @@ function MeetingDetails({ meeting, onDelete })
                     >
                         {getStatusText(meeting.status)}
                     </span>
+
+                    <ExportButtons meeting={meeting} />
 
                     <button
                         type="button"
