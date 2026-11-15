@@ -1985,3 +1985,41 @@ button {
     outline: 2px solid #f87171;
     outline-offset: 2px;
 }
+
+
+/* delete button on every row of the meeting list */
+.meeting-list-row {
+    display: flex;
+    align-items: stretch;
+    gap: 8px;
+}
+
+.meeting-list-row .meeting-list-item {
+    flex: 1;
+    min-width: 0;
+}
+
+.meeting-row-delete {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 44px;
+    border: 1px solid #e7ebf0;
+    border-radius: 13px;
+    background: white;
+    color: #94a3b8;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.meeting-row-delete:hover {
+    border-color: #fecaca;
+    background: #fef2f2;
+    color: #b91c1c;
+}
+
+.meeting-row-delete:focus-visible {
+    outline: 2px solid #f87171;
+    outline-offset: 2px;
+}

@@ -245,8 +245,12 @@ function App()
                 remainingMeetings
             )
 
+            // keep the open meeting unless it is the one that was deleted
             setSelectedMeeting(
-                remainingMeetings[0] || null
+                (current) =>
+                    current && current.id !== meeting.id
+                        ? current
+                        : remainingMeetings[0] || null
             )
 
             setMessage(
@@ -368,6 +372,9 @@ function App()
                         }
                         onSelectMeeting={
                             handleSelectMeeting
+                        }
+                        onDeleteMeeting={
+                            handleDeleteMeeting
                         }
                         loading={loading}
                     />

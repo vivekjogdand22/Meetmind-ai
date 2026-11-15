@@ -1,4 +1,7 @@
-function MeetingHistory({ meetings, selectedMeeting, onSelectMeeting, loading })
+import { Trash2 } from 'lucide-react'
+
+
+function MeetingHistory({ meetings, selectedMeeting, onSelectMeeting, onDeleteMeeting, loading })
 {
     const formatFileSize = (bytes) =>
     {
@@ -121,8 +124,11 @@ function MeetingHistory({ meetings, selectedMeeting, onSelectMeeting, loading })
                                             selectedMeeting?.id === meeting.id
 
                                         return (
-                                            <button
+                                            <div
                                                 key={meeting.id}
+                                                className="meeting-list-row"
+                                            >
+                                            <button
                                                 type="button"
                                                 className={
                                                     isSelected
@@ -196,6 +202,21 @@ function MeetingHistory({ meetings, selectedMeeting, onSelectMeeting, loading })
                                                 </div>
 
                                             </button>
+
+                                            <button
+                                                type="button"
+                                                className="meeting-row-delete"
+                                                aria-label={`Delete ${meeting.title || 'Untitled Meeting'}`}
+                                                title="Delete this meeting"
+                                                onClick={
+                                                    () =>
+                                                        onDeleteMeeting(meeting)
+                                                }
+                                            >
+                                                <Trash2 size={15} />
+                                            </button>
+
+                                            </div>
                                         )
                                     })
                                 }
