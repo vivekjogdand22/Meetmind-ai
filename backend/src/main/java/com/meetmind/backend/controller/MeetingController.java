@@ -1,5 +1,6 @@
 package com.meetmind.backend.controller;
 
+import com.meetmind.backend.dto.AskDto;
 import com.meetmind.backend.entity.Meeting;
 import com.meetmind.backend.service.MeetingService;
 
@@ -49,6 +50,17 @@ public class MeetingController
             @PathVariable Long id)
     {
         meetingService.deleteMeeting(id);
+    }
+
+    @PostMapping("/{id}/ask")
+    public AskDto.Answer askMeeting(
+            @PathVariable Long id,
+            @RequestBody AskDto.Request request)
+    {
+        return meetingService.askQuestion(
+                id,
+                request.question()
+        );
     }
 
     @PostMapping("/upload")

@@ -36,6 +36,23 @@ public class MeetingExceptionHandler
     }
 
 
+    // The meeting does not exist (for example it was deleted).
+    @ExceptionHandler(MeetingNotFoundException.class)
+    public ResponseEntity<ApiError> handleMissingMeeting(
+            MeetingNotFoundException exception)
+    {
+        return ResponseEntity
+                .status(404)
+                .body(
+                        new ApiError(
+                                404,
+                                "Not Found",
+                                exception.getMessage()
+                        )
+                );
+    }
+
+
     // The request itself was not acceptable, for example an empty file
     // or a file that is neither audio nor video.
     @ExceptionHandler(IllegalArgumentException.class)

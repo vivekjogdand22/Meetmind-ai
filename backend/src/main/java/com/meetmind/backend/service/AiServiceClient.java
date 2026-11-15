@@ -2,6 +2,7 @@ package com.meetmind.backend.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.meetmind.backend.dto.AskDto;
 import com.meetmind.backend.exception.AiProcessingException;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -11,6 +12,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -31,6 +33,15 @@ public class AiServiceClient
 
     private final RestTemplate restTemplate;
 
+    // Questions get a time limit so that a stuck model cannot hold a request
+    // open forever. Embedding the transcript plus two model calls normally
+    // take well under a minute.
+    private final RestTemplate askRestTemplate;
+
+    private static final int ASK_CONNECT_TIMEOUT_MS = 5_000;
+
+    private static final int ASK_READ_TIMEOUT_MS = 240_000;
+
 
     public AiServiceClient(
             @Value("${ai.service.url}") String aiServiceUrl,
@@ -41,6 +52,15 @@ public class AiServiceClient
         this.objectMapper = objectMapper;
 
         this.restTemplate = new RestTemplate();
+
+        SimpleClientHttpRequestFactory askFactory =
+                new SimpleClientHttpRequestFactory();
+
+        askFactory.setConnectTimeout(ASK_CONNECT_TIMEOUT_MS);
+
+        askFactory.setReadTimeout(ASK_READ_TIMEOUT_MS);
+
+        this.askRestTemplate = new RestTemplate(askFactory);
     }
 
 
@@ -218,6 +238,73 @@ public class AiServiceClient
 
 
     // ============================================================
+    // ASKING A QUESTION ABOUT A MEETING
+    // ============================================================
+
+    public AskDto.Answer ask(String transcript, String question)
+    {
+        try
+        {
+            HttpHeaders requestHeaders =
+                    new HttpHeaders();
+
+            requestHeaders.setContentType(
+                    MediaType.APPLICATION_JSON
+            );
+
+
+            HttpEntity<Map<String, String>>
+                    requestEntity =
+                    new HttpEntity<>(
+                            Map.of(
+                                    "transcript",
+                                    transcript,
+                                    "question",
+                                    question
+                            ),
+                            requestHeaders
+                    );
+
+
+            ResponseEntity<String> response =
+                    askRestTemplate.postForEntity(
+                            aiServiceUrl + "/ask",
+                            requestEntity,
+                            String.class
+                    );
+
+
+            AskDto.Answer answer =
+                    objectMapper.readValue(
+                            response.getBody(),
+                            AskDto.Answer.class
+                    );
+
+
+            if (answer.answer() == null
+                    || answer.answer().isBlank())
+            {
+                throw new AiProcessingException(
+                        "The AI service returned no answer",
+                        HttpStatus.BAD_GATEWAY,
+                        null
+                );
+            }
+
+
+            return answer;
+        }
+        catch (Exception exception)
+        {
+            throw explain(
+                    "The AI service could not answer the question",
+                    exception
+            );
+        }
+    }
+
+
+    // ============================================================
     // TURNING FAILURES INTO MESSAGES A PERSON CAN ACT ON
     // ============================================================
 
@@ -241,10 +328,16 @@ public class AiServiceClient
                             response.getResponseBodyAsString()
                     );
 
+            // 503 means a model (Ollama) is unavailable: say so, it is not
+            // a broken AI service.
             HttpStatus status =
-                    response.getStatusCode().value() == 422
-                            ? HttpStatus.UNPROCESSABLE_ENTITY
-                            : HttpStatus.BAD_GATEWAY;
+                    switch (response.getStatusCode().value())
+                    {
+                        case 400 -> HttpStatus.BAD_REQUEST;
+                        case 422 -> HttpStatus.UNPROCESSABLE_ENTITY;
+                        case 503 -> HttpStatus.SERVICE_UNAVAILABLE;
+                        default -> HttpStatus.BAD_GATEWAY;
+                    };
 
             return new AiProcessingException(
                     detail != null ? detail : whatFailed,
@@ -256,6 +349,18 @@ public class AiServiceClient
 
         // The AI service could not be reached at all (not started,
         // wrong address, connection dropped, timed out).
+        if (exception instanceof ResourceAccessException
+                && exception.getCause() instanceof java.net.SocketTimeoutException)
+        {
+            return new AiProcessingException(
+                    "The AI service took too long to answer. "
+                            + "Try again, or ask a shorter question.",
+                    HttpStatus.GATEWAY_TIMEOUT,
+                    exception
+            );
+        }
+
+
         if (exception instanceof ResourceAccessException)
         {
             return new AiProcessingException(

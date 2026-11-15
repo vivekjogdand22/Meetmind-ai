@@ -2,7 +2,9 @@ package com.meetmind.backend.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.meetmind.backend.dto.AskDto;
 import com.meetmind.backend.entity.Meeting;
+import com.meetmind.backend.exception.MeetingNotFoundException;
 import com.meetmind.backend.repository.MeetingRepository;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -98,6 +100,59 @@ public class MeetingService
 
         return meetingRepository.save(
                 existingMeeting
+        );
+    }
+
+
+    // "Ask Your Meeting": the answer comes only from this meeting's
+    // transcript. Nothing is stored.
+    public static final int MAX_QUESTION_CHARS = 500;
+
+    public AskDto.Answer askQuestion(
+            Long id,
+            String question)
+    {
+        String cleanQuestion =
+                question == null ? "" : question.strip();
+
+        if (cleanQuestion.isEmpty())
+        {
+            throw new IllegalArgumentException(
+                    "Please type a question."
+            );
+        }
+
+        if (cleanQuestion.length() > MAX_QUESTION_CHARS)
+        {
+            throw new IllegalArgumentException(
+                    "The question is too long. Please keep it under "
+                            + MAX_QUESTION_CHARS
+                            + " characters."
+            );
+        }
+
+
+        Meeting meeting =
+                meetingRepository
+                        .findById(id)
+                        .orElseThrow(
+                                () -> new MeetingNotFoundException(
+                                        "Meeting " + id + " was not found."
+                                )
+                        );
+
+        if (meeting.getTranscript() == null
+                || meeting.getTranscript().isBlank())
+        {
+            throw new IllegalArgumentException(
+                    "This meeting has no transcript to ask about."
+            );
+        }
+
+
+        return aiServiceClient.ask(
+                meeting.getTranscript(),
+                cleanQuestion
         );
     }
 
