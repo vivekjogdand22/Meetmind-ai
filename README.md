@@ -13,9 +13,11 @@ AI-powered meeting intelligence platform that converts meeting recordings into s
 - 👥 Owner assignment
 - ⏰ Due date extraction
 - 🔥 Priority detection
-- 📚 Meeting history
+- 📚 Meeting history, with a search box (title, summary, decisions, action items or anything said) and a delete button on every meeting
 - 🗑 Delete a meeting (removes its recording, results and plan)
 - 💬 **Ask Your Meeting**: ask a question about one meeting and get an answer taken only from its transcript, with the exact quoted evidence, or "Not discussed"
+- 📖 **API documentation** with a try-it-out page: start the backend and open http://localhost:8080/swagger-ui.html
+- 📄 **Export** a meeting report (summary, decisions, action items and the full transcript) as a **PDF** or a **Word** file from the meeting header. The PDF supports Western European languages only (other scripts show as `?`); the Word file keeps every language
 - 🗓 PERT/CPM project planning: turn action items into a schedule with expected times, slack, the critical path and a timeline, plus a deadline check and a "what if a task is late?" simulation
 - 🎨 Modern React UI
 
@@ -261,6 +263,29 @@ Upload an audio or video meeting and MeetMind AI will automatically:
 - 🔥 Detect priorities
 
 ---
+## 🐳 Run Everything with Docker (optional)
+
+One command starts the database, the AI service, the backend and the website. You still run **Ollama on your own computer** (it uses your graphics chip there, which Docker cannot); the containers reach it by themselves.
+
+1. Install and start **Docker Desktop**.
+2. Start Ollama and download both models once (see step 4 of the installation above).
+3. Create your settings file, then open `.env` and replace `change-me` with a password of your choice:
+
+```bash
+cp .env.example .env
+```
+
+4. Build and start everything (the first build takes several minutes):
+
+```bash
+docker compose up --build
+```
+
+5. Open `http://localhost:5173`. The API documentation is at `http://localhost:8080/swagger-ui.html`.
+
+The first recording you upload also downloads the speech model inside the container, so it is slower once. Your meetings, recordings and database live in Docker volumes and survive restarts. Stop with `docker compose down`. To also delete all data, use `docker compose down -v`.
+
+---
 ## ⏱ What to Expect
 
 Measured on an Apple M2 laptop with 16 GB of RAM, a real 4-minute recording (620 words) went from clicking **Generate AI insights** to the finished results in about 80 seconds: roughly 30 seconds for transcription and saving, and about 50 seconds for the AI analysis. The AI analysis of a short transcript (a few hundred words) takes roughly 30 seconds to 2 minutes, and the transcript of a 30-minute meeting takes 2 to 3 minutes to analyze. The first request after Ollama has been idle is slower because the model has to be loaded again.
@@ -336,7 +361,7 @@ The Vite dev server listens on `localhost`, so open `http://localhost:5173` (typ
 ---
 ## 🧪 Tests
 
-- Backend (86 tests, no PostgreSQL, password, Whisper or Ollama needed: they use an in-memory database and a stand-in for the AI service, and cover the whole upload pipeline): `cd backend && ./mvnw test`
+- Backend (88 tests, no PostgreSQL, password, Whisper or Ollama needed: they use an in-memory database and a stand-in for the AI service, and cover the whole upload pipeline): `cd backend && ./mvnw test`
 - AI service logic (119 tests, no Ollama needed): `cd ai-service && python -m unittest discover -s tests -v`
 - Project-plan API against real PostgreSQL and a running backend: `python3 docs/plan_api_smoke_test.py`. The endpoints are described in `docs/project-plan-api.md`.
 - AI extraction quality: start the AI service, then run `python eval/run_eval.py` from the `ai-service` folder. See `ai-service/eval/README.md`.
