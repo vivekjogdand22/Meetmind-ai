@@ -9,6 +9,7 @@ import {
     UserRound
 } from 'lucide-react'
 
+import AskMeeting from './AskMeeting'
 import ProjectPlan from './ProjectPlan'
 
 
@@ -341,6 +342,13 @@ function MeetingDetails({ meeting, onDelete })
                     </article>
 
                 </div>
+
+
+                <AskMeeting
+                    key={`ask-${meeting.id}`}
+                    meetingId={meeting.id}
+                    hasTranscript={Boolean(meeting.transcript)}
+                />
 
 
                 <ProjectPlan
