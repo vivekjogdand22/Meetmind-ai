@@ -110,6 +110,17 @@ else
     problem "Ollama is running, but the model $MODEL is not downloaded" "ollama pull $MODEL"
 fi
 
+# the small model that "Ask Your Meeting" uses to find the right passage
+if [ -n "$TAGS" ]; then
+    EMBED="${OLLAMA_EMBED_MODEL:-nomic-embed-text}"
+
+    if echo "$TAGS" | grep -q "\"name\":\"$EMBED"; then
+        ok "Ollama has the model $EMBED (used by Ask Your Meeting)"
+    else
+        problem "The model $EMBED for Ask Your Meeting is not downloaded" "ollama pull $EMBED"
+    fi
+fi
+
 
 # ------------------------------------------------------------
 section "The three MeetMind programs"

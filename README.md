@@ -15,6 +15,7 @@ AI-powered meeting intelligence platform that converts meeting recordings into s
 - 🔥 Priority detection
 - 📚 Meeting history
 - 🗑 Delete a meeting (removes its recording, results and plan)
+- 💬 **Ask Your Meeting**: ask a question about one meeting and get an answer taken only from its transcript, with the exact quoted evidence, or "Not discussed"
 - 🗓 PERT/CPM project planning: turn action items into a schedule with expected times, slack, the critical path and a timeline, plus a deadline check and a "what if a task is late?" simulation
 - 🎨 Modern React UI
 
@@ -188,6 +189,12 @@ Download the language model once and keep Ollama running:
 ollama pull qwen3:8b
 ```
 
+Then download the small model that finds the right part of a transcript when you ask a question (about 270 MB):
+
+```bash
+ollama pull nomic-embed-text
+```
+
 Then, in a new terminal, create the Python environment. You only do this the first time:
 
 ```bash
@@ -273,6 +280,20 @@ Every meeting has a **Project Plan** panel under its action items. It turns the 
 The plan is a copy of the action items. Editing it does not change the list the AI extracted, and deleting a meeting deletes its plan. The endpoints are described in `docs/project-plan-api.md`.
 
 ---
+## 💬 Using Ask Your Meeting
+
+Every meeting has an **Ask Your Meeting** panel above the project plan.
+
+1. Type a question, or click one of the example questions.
+2. The answer comes **only from this meeting's transcript**. Under it you see the passage the answer rests on, with the exact words highlighted. These words are checked against the transcript by code, not just by the AI.
+3. If the meeting does not talk about it, you get **Not discussed**. It never answers from general knowledge.
+4. If the AI gives an answer that the transcript cannot confirm, you see **Could not confirm an answer**. Try other words.
+
+It works best for one fact at a time ("Who owns the Stripe integration?"). A broad question such as "summarize everything" only sees the closest passages, and the panel says so. Questions are not saved. The first question about a meeting takes longer (up to about a minute) because the transcript is indexed once; later questions are faster.
+
+Needs Ollama running with both models (`qwen3:8b` and `nomic-embed-text`). If one is missing, the panel tells you what to run.
+
+---
 ## 🔧 AI Service Settings
 
 These constants are at the top of `ai-service/meeting_analysis.py`:
@@ -283,7 +304,7 @@ These constants are at the top of `ai-service/meeting_analysis.py`:
 | `CONTEXT_SIZES` | `(4096, 8192, 16384, 32768)` | The model's context window is chosen to fit the transcript. Ollama's default window of 4096 tokens silently cuts off longer recordings. |
 | `OLLAMA_TIMEOUT_SECONDS` | `600` | How long the service waits for the model before it switches to the simple rule-based fallback. |
 
-Two environment variables change where the AI service looks for Ollama: `OLLAMA_URL` (default `http://127.0.0.1:11434/api/chat`) and `OLLAMA_MODEL` (default `qwen3:8b`).
+Two environment variables change where the AI service looks for Ollama: `OLLAMA_URL` (default `http://127.0.0.1:11434/api/chat`) and `OLLAMA_MODEL` (default `qwen3:8b`). Ask Your Meeting also uses `OLLAMA_EMBED_URL` (default `http://127.0.0.1:11434/api/embed`) and `OLLAMA_EMBED_MODEL` (default `nomic-embed-text`).
 
 If the AI service terminal prints `Using rule-based fallback`, the language-model step failed and the result is of lower quality. The meeting then shows a yellow notice saying so, so you know to start Ollama and upload the recording again.
 
@@ -303,6 +324,7 @@ Run the doctor first. It only reads, and it tells you what is wrong and how to f
 | `Port 8080 was already in use` | An old backend is still running | `lsof -i :8080`, then stop that process |
 | The page says "Unable to reach the MeetMind backend" | The backend or PostgreSQL is not running | Start them (see the steps above), then run the doctor |
 | The browser console says a request was "blocked by CORS policy" | The page was opened from an address the backend does not allow | Open `http://localhost:5173`. To allow another address, set `CORS_ALLOWED_ORIGINS` and restart the backend |
+| Ask Your Meeting says Ollama is not reachable, or that a model is not installed | Ollama is not running, or `nomic-embed-text` was not downloaded | Run `brew services start ollama`, then `ollama pull nomic-embed-text` |
 | A meeting shows a yellow "The AI model was not available" notice | Ollama was not running (or the model was missing) when the meeting was analyzed | Start Ollama, run `ollama pull qwen3:8b`, then upload the recording again |
 | `./mvnw: Permission denied` | The wrapper script is not executable | `chmod +x backend/mvnw` |
 | A meeting has no "Create plan from ..." button | The meeting has no action items | Use **Add a task manually** |
@@ -314,10 +336,11 @@ The Vite dev server listens on `localhost`, so open `http://localhost:5173` (typ
 ---
 ## 🧪 Tests
 
-- Backend (73 tests, no PostgreSQL, password, Whisper or Ollama needed: they use an in-memory database and a stand-in for the AI service, and cover the whole upload pipeline): `cd backend && ./mvnw test`
-- AI service logic (19 tests, no Ollama needed): `cd ai-service && python -m unittest discover -s tests -v`
+- Backend (86 tests, no PostgreSQL, password, Whisper or Ollama needed: they use an in-memory database and a stand-in for the AI service, and cover the whole upload pipeline): `cd backend && ./mvnw test`
+- AI service logic (119 tests, no Ollama needed): `cd ai-service && python -m unittest discover -s tests -v`
 - Project-plan API against real PostgreSQL and a running backend: `python3 docs/plan_api_smoke_test.py`. The endpoints are described in `docs/project-plan-api.md`.
 - AI extraction quality: start the AI service, then run `python eval/run_eval.py` from the `ai-service` folder. See `ai-service/eval/README.md`.
+- Ask Your Meeting quality (needs Ollama with both models): `python eval/run_qa_eval.py --answers` from the `ai-service` folder grades 28 questions, including ones the meeting does not answer. The number that must stay at 0 is *invented answers*.
 
 ---
 ## 🚀 Future Improvements

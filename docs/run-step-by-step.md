@@ -75,6 +75,14 @@ ollama pull qwen3:8b
 
 You should see a download bar. It is a few gigabytes and takes a while.
 
+Then download the small model that "Ask Your Meeting" uses to find the right part of a transcript:
+
+```bash
+ollama pull nomic-embed-text
+```
+
+This one is about 270 MB.
+
 ---
 
 ## Part B: start MeetMind (every time)
@@ -99,7 +107,7 @@ You should see `Successfully started` (or `already started`, which is fine).
 ollama list
 ```
 
-You should see a table that contains `qwen3:8b`.
+You should see a table that contains `qwen3:8b` and `nomic-embed-text`.
 
 If you see an error such as `could not connect to ollama app`, run this and then run `ollama list` again:
 
