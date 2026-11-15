@@ -1,0 +1,82 @@
+meeting   grade      sec  question
+planning  right     36.8     Who owns the Stripe integration?
+                        answer: Meera owns the Stripe integration.
+                        quote:  "Meera, you own the Stripe integration"
+planning  right     16.4     When will the production deployment happen?
+                        answer: The production deployment will happen on the twentieth.
+                        quote:  "Arjun will deploy to production, and we want that to happen on the twentieth"
+planning  right     25.3     What was decided about fraud detection?
+                        answer: Fraud detection work was postponed to next quarter.
+                        quote:  "we decided to track failed payments in the dashboard, but we are postponing the fraud detection work to next quarter"
+planning  right     22.9     Who will email Legal and when?
+                        answer: Priya will email Legal today.
+                        quote:  "Priya will email Legal today to get the exact wording first"
+planning  right     19.7     How long can Jon take for the confirmation email?
+                        answer: Jon can take until the end of the month for the confirmation email.
+                        quote:  "There's no rush, he can take until the end of the month"
+planning  refused    6.2     What is the total budget of the payment project?
+                        answer: The meeting does not say.
+planning  refused    6.1     Who won the 2022 football World Cup?
+                        answer: The meeting does not say.
+standup   right     19.4     Why was Sneha blocked?
+                        answer: Sneha was blocked because she did not have access to the staging database.
+                        quote:  "Sneha, you were blocked on the database credentials, right"
+standup   right     20.9     What happened with dark mode?
+                        answer: Dark mode support was decided not to include in this release.
+                        quote:  "We talked about it and decided not to do it in this release, we will revisit it after launch"
+standup   refused    5.9     What time is the next standup?
+                        answer: The meeting does not say.
+kickoff   right     18.4     Which database did the team choose?
+                        answer: The team chose PostgreSQL.
+                        quote:  "we are going with PostgreSQL and not MongoDB, that is final"
+kickoff   right     18.1     How long will the REST endpoints take Omar?
+                        answer: The REST endpoints will take Omar about a week.
+                        quote:  "Omar can build the REST endpoints, and he thinks that will take about a week"
+long      right     25.0     What hosting provider did they switch to?
+                        answer: They switched to Hetzner as their hosting provider.
+                        quote:  "We decided to switch the hosting provider to Hetzner"
+long      right     20.6     Who must fix the login outage?
+                        answer: Kiran must fix the critical login outage immediately.
+                        quote:  "Kiran must fix the critical login outage immediately"
+long      right     19.7     Who will book the venue for the offsite?
+                        answer: Omar will book the venue for the offsite.
+                        quote:  "Omar will book the venue for the team offsite before the end of May"
+long      refused   12.2     What is the price of the premium plan?
+                        answer: The meeting does not say.
+messy     right     18.8     Who will send the onboarding email draft and by when?
+                        answer: Sarah will send the onboarding email draft by Wednesday.
+                        quote:  "Sarah, you were going to write the onboarding email, right? Yeah, I'll send you the draft by Wednesday"
+messy     right     14.0     What was decided about Internet Explorer?
+                        answer: Support for Internet Explorer was decided to be dropped.
+                        quote:  "we agreed to drop support for Internet Explorer, finally. That's decided"
+messy     refused    5.6     Who leads the finance team?
+                        answer: The meeting does not say.
+sample    right     17.0     Where will the final demonstration be held?
+                        answer: The final demonstration will be held in the seminar hall.
+                        quote:  "We also agreed that the final demonstration will be held in the seminar hall"
+sample    right     13.1     Who will prepare the demo slides?
+                        answer: Priya will prepare the demo slides.
+                        quote:  "Priya, please prepare the demo slides by next Tuesday"
+sample    refused    5.6     What is the budget of the project?
+                        answer: The meeting does not say.
+planning  refused   10.2     Who owns the PayPal integration?
+                        answer: The meeting does not say.
+planning  refused   11.1     Who is updating the refund policy page?
+                        answer: The meeting does not say.
+planning  refused    5.6     What time is the client demo on the twenty-second?
+                        answer: The meeting does not say.
+standup   right     18.7     Who is writing the release notes for version two?
+                        answer: No one is writing the release notes for version two.
+                        quote:  "We also need someone to write the release notes for version two, nobody has picked it up yet"
+kickoff   refused   16.0     How many days does Tara need for the Figma designs?
+                        answer: I found related text but could not confirm an exact answer from it. Try rephrasing the question.
+kickoff   refused   15.8     Why did the team choose PostgreSQL over MongoDB?
+                        answer: I found related text but could not confirm an exact answer from it. Try rephrasing the question.
+
+Answered right:            17/17
+Missed (said 'not said'):  0
+Wrong answer:              0
+Blocked by the quote check:  0
+Correctly refused:         11/11
+INVENTED an answer:        0/11   (must be 0)
+Seconds per question:      median 16.7, slowest 36.8

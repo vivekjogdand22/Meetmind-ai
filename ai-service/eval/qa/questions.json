@@ -1,0 +1,214 @@
+{
+  "description": "Questions about the test meetings in ../meetings. 'evidence' is text that the best passage must contain (checks retrieval). 'answer' lists keywords the answer must contain, each 'a|b' meaning either one (checks the answer). A question with answerable=false has no answer in the meeting: the right reply is that the meeting does not say.",
+  "questions": [
+    {
+      "meeting": "planning",
+      "question": "Who owns the Stripe integration?",
+      "answerable": true,
+      "evidence": "you own the stripe integration",
+      "answer": [
+        "meera"
+      ]
+    },
+    {
+      "meeting": "planning",
+      "question": "When will the production deployment happen?",
+      "answerable": true,
+      "evidence": "deploy to production",
+      "answer": [
+        "twentieth|20th"
+      ]
+    },
+    {
+      "meeting": "planning",
+      "question": "What was decided about fraud detection?",
+      "answerable": true,
+      "evidence": "postponing the fraud detection",
+      "answer": [
+        "postpon|next quarter"
+      ]
+    },
+    {
+      "meeting": "planning",
+      "question": "Who will email Legal and when?",
+      "answerable": true,
+      "evidence": "priya will email legal",
+      "answer": [
+        "priya",
+        "today"
+      ]
+    },
+    {
+      "meeting": "planning",
+      "question": "How long can Jon take for the confirmation email?",
+      "answerable": true,
+      "evidence": "end of the month",
+      "answer": [
+        "month"
+      ]
+    },
+    {
+      "meeting": "planning",
+      "question": "What is the total budget of the payment project?",
+      "answerable": false
+    },
+    {
+      "meeting": "planning",
+      "question": "Who won the 2022 football World Cup?",
+      "answerable": false
+    },
+    {
+      "meeting": "standup",
+      "question": "Why was Sneha blocked?",
+      "answerable": true,
+      "evidence": "database credentials",
+      "answer": [
+        "credential|access"
+      ]
+    },
+    {
+      "meeting": "standup",
+      "question": "What happened with dark mode?",
+      "answerable": true,
+      "evidence": "dark mode",
+      "answer": [
+        "not|decided|revisit|launch"
+      ]
+    },
+    {
+      "meeting": "standup",
+      "question": "What time is the next standup?",
+      "answerable": false
+    },
+    {
+      "meeting": "kickoff",
+      "question": "Which database did the team choose?",
+      "answerable": true,
+      "evidence": "postgresql",
+      "answer": [
+        "postgres"
+      ]
+    },
+    {
+      "meeting": "kickoff",
+      "question": "How long will the REST endpoints take Omar?",
+      "answerable": true,
+      "evidence": "about a week",
+      "answer": [
+        "week"
+      ]
+    },
+    {
+      "meeting": "long",
+      "question": "What hosting provider did they switch to?",
+      "answerable": true,
+      "evidence": "hetzner",
+      "answer": [
+        "hetzner"
+      ]
+    },
+    {
+      "meeting": "long",
+      "question": "Who must fix the login outage?",
+      "answerable": true,
+      "evidence": "kiran must fix",
+      "answer": [
+        "kiran"
+      ]
+    },
+    {
+      "meeting": "long",
+      "question": "Who will book the venue for the offsite?",
+      "answerable": true,
+      "evidence": "omar will book the venue",
+      "answer": [
+        "omar"
+      ]
+    },
+    {
+      "meeting": "long",
+      "question": "What is the price of the premium plan?",
+      "answerable": false
+    },
+    {
+      "meeting": "messy",
+      "question": "Who will send the onboarding email draft and by when?",
+      "answerable": true,
+      "evidence": "send you the draft by wednesday",
+      "answer": [
+        "wednesday"
+      ]
+    },
+    {
+      "meeting": "messy",
+      "question": "What was decided about Internet Explorer?",
+      "answerable": true,
+      "evidence": "internet explorer",
+      "answer": [
+        "drop"
+      ]
+    },
+    {
+      "meeting": "messy",
+      "question": "Who leads the finance team?",
+      "answerable": false
+    },
+    {
+      "meeting": "sample",
+      "question": "Where will the final demonstration be held?",
+      "answerable": true,
+      "evidence": "seminar hall",
+      "answer": [
+        "seminar"
+      ]
+    },
+    {
+      "meeting": "sample",
+      "question": "Who will prepare the demo slides?",
+      "answerable": true,
+      "evidence": "priya, please prepare the demo slides",
+      "answer": [
+        "priya"
+      ]
+    },
+    {
+      "meeting": "sample",
+      "question": "What is the budget of the project?",
+      "answerable": false
+    },
+    {
+      "meeting": "planning",
+      "question": "Who owns the PayPal integration?",
+      "answerable": false
+    },
+    {
+      "meeting": "planning",
+      "question": "Who is updating the refund policy page?",
+      "answerable": false
+    },
+    {
+      "meeting": "planning",
+      "question": "What time is the client demo on the twenty-second?",
+      "answerable": false
+    },
+    {
+      "meeting": "standup",
+      "question": "Who is writing the release notes for version two?",
+      "answerable": true,
+      "evidence": "nobody has picked it up",
+      "answer": [
+        "nobody|no one|not"
+      ]
+    },
+    {
+      "meeting": "kickoff",
+      "question": "How many days does Tara need for the Figma designs?",
+      "answerable": false
+    },
+    {
+      "meeting": "kickoff",
+      "question": "Why did the team choose PostgreSQL over MongoDB?",
+      "answerable": false
+    }
+  ]
+}

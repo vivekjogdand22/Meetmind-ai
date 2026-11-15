@@ -6,6 +6,12 @@ from fastapi import FastAPI, File, HTTPException, UploadFile
 from faster_whisper import WhisperModel
 from meeting_analysis import OLLAMA_MODEL, analyze_meeting_with_llm
 from pydantic import BaseModel
+from question_answering import (
+    MAX_QUESTION_CHARS,
+    AnswerError,
+    answer_question,
+)
+from retrieval import RetrievalError
 
 
 app = FastAPI(
@@ -35,6 +41,11 @@ whisper_model = WhisperModel(
 
 class MeetingAnalysisRequest(BaseModel):
     transcript: str
+
+
+class AskRequest(BaseModel):
+    transcript: str
+    question: str
 
 
 # ============================================================
@@ -196,6 +207,73 @@ def analyze_meeting(
             status_code=500,
             detail=(
                 "Meeting analysis failed: "
+                f"{str(exception)}"
+            ),
+        ) from exception
+
+# ============================================================
+# ASK YOUR MEETING ENDPOINT
+# ============================================================
+
+@app.post("/ask")
+def ask_meeting(
+    request: AskRequest,
+):
+
+    transcript = request.transcript.strip()
+
+    question = request.question.strip()
+
+
+    if not transcript:
+
+        raise HTTPException(
+            status_code=400,
+            detail="Transcript cannot be empty",
+        )
+
+
+    if not question:
+
+        raise HTTPException(
+            status_code=400,
+            detail="Question cannot be empty",
+        )
+
+
+    if len(question) > MAX_QUESTION_CHARS:
+
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "The question is too long. Please keep it under "
+                f"{MAX_QUESTION_CHARS} characters."
+            ),
+        )
+
+
+    try:
+
+        return answer_question(
+            transcript,
+            question,
+        )
+
+
+    except (RetrievalError, AnswerError) as exception:
+
+        raise HTTPException(
+            status_code=503,
+            detail=str(exception),
+        ) from exception
+
+
+    except Exception as exception:
+
+        raise HTTPException(
+            status_code=500,
+            detail=(
+                "Answering the question failed: "
                 f"{str(exception)}"
             ),
         ) from exception
