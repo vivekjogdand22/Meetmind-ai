@@ -314,10 +314,13 @@ The first time you open the app you see a login screen. Choose **Create account*
 - **Meetings from before accounts.** If you already uploaded meetings before this version, the **first account you create** receives all of them. Create your own account first.
 - **Sessions.** A login lasts 12 hours (change it with `JWT_HOURS`). After that you log in again.
 - **Passwords** are stored only as a BCrypt hash, never as text.
+- **Forgot your password?** When you create an account you are shown a **recovery code** (like `ABCDE-FGH23-JKMNP-QRSTV`) **once**. Click **Save** (copy or download it) and keep it safe. On the login screen, **Forgot your password?** takes your email, that code and a new password. A reset gives you a **new** recovery code (the used one stops working) and ends every other login. There is no email sending, so this code is the only way back in. Accounts created before this feature show an amber **Get a recovery code** button in the header.
+- **Change password** and **new recovery code:** the **Account** button in the header. Changing the password keeps this browser logged in and ends all other logins.
+- **Guessing is limited.** After 5 wrong passwords (or 5 wrong recovery codes) for one email, that email is locked for 15 minutes, even for the right password, and the page says how long to wait. A successful login or a reset with the recovery code clears the count. One network address gets 20 tries in total. Change the limits with `MAX_LOGIN_FAILURES` and `LOGIN_LOCK_MINUTES`. The counts are kept in memory and start again when the backend restarts.
 - **`JWT_SECRET`.** Logins are signed with a secret of at least 32 characters. Set it in `backend/.env` (for example `JWT_SECRET=` followed by the result of `openssl rand -base64 32`). Without it the backend makes a random one at every start, so everybody has to log in again after each restart. The Docker setup reads it from the `.env` file next to `docker-compose.yml`.
 - **API users:** log in with `POST /api/auth/login`, then send `Authorization: Bearer <token>` with every request. The Swagger page has an **Authorize** button for this.
 
-There is no password reset and no limit on login attempts yet; this is a project for use on your own computer or network, not a public website.
+**Good to know:** the login token is kept in the browser's local storage, which is normal for a project like this but means a malicious script on the page could read it. This is built for use on your own computer or network, not as a public website; for that you would add HTTPS, email-based resets and a shared login-attempt store.
 
 ---
 ## 💬 Using Ask Your Meeting
@@ -376,7 +379,7 @@ The Vite dev server listens on `localhost`, so open `http://localhost:5173` (typ
 ---
 ## 🧪 Tests
 
-- Backend (110 tests, no PostgreSQL, password, Whisper or Ollama needed: they use an in-memory database and a stand-in for the AI service, and cover the whole upload pipeline): `cd backend && ./mvnw test`
+- Backend (142 tests, no PostgreSQL, password, Whisper or Ollama needed: they use an in-memory database and a stand-in for the AI service, and cover the whole upload pipeline): `cd backend && ./mvnw test`
 - AI service logic (119 tests, no Ollama needed): `cd ai-service && python -m unittest discover -s tests -v`
 - Project-plan API against real PostgreSQL and a running backend: `MEETMIND_EMAIL=you@example.com MEETMIND_PASSWORD=your-password python3 docs/plan_api_smoke_test.py` (use an account you created in the app). The endpoints are described in `docs/project-plan-api.md`.
 - AI extraction quality: start the AI service, then run `python eval/run_eval.py` from the `ai-service` folder. See `ai-service/eval/README.md`.
