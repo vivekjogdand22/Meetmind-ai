@@ -6,6 +6,9 @@ import com.meetmind.backend.service.PlanService;
 import jakarta.validation.Valid;
 
 import org.springframework.http.HttpStatus;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import org.springframework.web.bind.annotation.*;
 
 
@@ -22,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 // ============================================================
 
 @RestController
+@Tag(name = "Project plan", description = "PERT/CPM planning for the action items of one meeting")
 @RequestMapping("/api/meetings/{meetingId}/plan")
 public class PlanController
 {
@@ -36,6 +40,7 @@ public class PlanController
 
     // targetDays is optional: with it, the answer also says how likely the
     // project is to finish within that many days.
+    @Operation(summary = "Get the plan, schedule and critical path (optionally the chance of finishing within targetDays)")
     @GetMapping
     public PlanDto.PlanResponse getPlan(
             @PathVariable Long meetingId,
@@ -45,6 +50,7 @@ public class PlanController
     }
 
 
+    @Operation(summary = "Create the plan from the meeting's action items")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public PlanDto.PlanResponse createPlan(
@@ -54,6 +60,7 @@ public class PlanController
     }
 
 
+    @Operation(summary = "Delete the whole plan")
     @DeleteMapping
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deletePlan(
@@ -63,6 +70,7 @@ public class PlanController
     }
 
 
+    @Operation(summary = "Add a task with time estimates and dependencies")
     @PostMapping("/tasks")
     @ResponseStatus(HttpStatus.CREATED)
     public PlanDto.PlanResponse addTask(
@@ -73,6 +81,7 @@ public class PlanController
     }
 
 
+    @Operation(summary = "Change a task")
     @PutMapping("/tasks/{taskId}")
     public PlanDto.PlanResponse updateTask(
             @PathVariable Long meetingId,
@@ -83,6 +92,7 @@ public class PlanController
     }
 
 
+    @Operation(summary = "Remove a task")
     @DeleteMapping("/tasks/{taskId}")
     public PlanDto.PlanResponse deleteTask(
             @PathVariable Long meetingId,
@@ -92,6 +102,7 @@ public class PlanController
     }
 
 
+    @Operation(summary = "Simulate a delay of one task (nothing is saved)")
     @PostMapping("/what-if")
     public PlanDto.WhatIfResponse whatIf(
             @PathVariable Long meetingId,
